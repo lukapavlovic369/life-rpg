@@ -105,8 +105,11 @@ if (Math.floor(newXP / 1000) > Math.floor(xp / 1000)) {
     return (
       <div style={{
         position: "absolute",
+        zIndex: 20,
         top: task.y,
-        left: task.x,
+left: "50%",
+transform: "translateX(-50%)",
+marginLeft: `${task.x - 440}px`,
         display: "flex",
         alignItems: "center",
         gap: "10px",
@@ -211,16 +214,16 @@ const hygieneTasks: Task[] = [
 ];
 
 const workTasks: Task[] = [
-  { id: "w1", text: "", x: 650, y: 195 },
-  { id: "w2", text: "", x: 650, y: 245 },
-  { id: "w3", text: "", x: 650, y: 295 },
-  { id: "w4", text: "", x: 650, y: 345 },
-  { id: "w5", text: "", x: 650, y: 395 },
-  { id: "w6", text: "", x: 650, y: 680 },
-  { id: "w7", text: "", x: 650, y: 708 },
-  { id: "w8", text: "", x: 650, y: 736 },
-  { id: "w9", text: "", x: 650, y: 764 },
-  { id: "w10", text: "", x: 650, y: 792 },
+  { id: "w1", text: "", x: 650, y: 175 },
+  { id: "w2", text: "", x: 650, y: 225 },
+  { id: "w3", text: "", x: 650, y: 275 },
+  { id: "w4", text: "", x: 650, y: 325 },
+  { id: "w5", text: "", x: 650, y: 375 },
+  { id: "w6", text: "", x: 650, y: 660 },
+  { id: "w7", text: "", x: 650, y: 688 },
+  { id: "w8", text: "", x: 650, y: 716 },
+  { id: "w9", text: "", x: 650, y: 744 },
+  { id: "w10", text: "", x: 650, y: 772 },
 ];
 function getBackground() {
   if (screen === "status") return "/status.png";
@@ -232,10 +235,10 @@ function getBackground() {
 return (
   <div style={{
     height: "100vh",
-    overflow: "hidden",
+    overflow: "auto",
     display: "flex",
     justifyContent: "center",
-    alignItems: "center"
+alignItems: "flex-start"
   }}>
     <div style={{
       position: "fixed",
@@ -252,15 +255,18 @@ return (
       </div>
 
       {/* BACKGROUND */}
+
+
       <div style={{
-        width: "900px",
-        height: "100%",
-        backgroundImage: `url(${getBackground()})`,
-        backgroundSize: "contain",
-        backgroundRepeat: "no-repeat",
-        backgroundPosition: "center",
-        backgroundColor: "black",
-        position: "relative"
+width: "900px",
+height: "900px",
+
+backgroundImage: `url(${getBackground()})`,
+backgroundSize: "contain",
+backgroundRepeat: "no-repeat",
+backgroundPosition: "center",
+backgroundColor: "black",
+position: "relative"
       }}>
 {screen === "status" && (
   <div style={{
@@ -296,8 +302,10 @@ return (
 {screen === "status" && (
   <div style={{
     position: "absolute",
-    top: 343,   // pomakni da sjedne na HP liniju
-    left: 365,
+    top: 339,   // pomakni da sjedne na HP liniju
+left: "50%",
+transform: "translateX(-50%)",
+marginLeft: "25px",
     width: "220px",
     height: "12px",
     background: "rgba(0,255,255,0.2)",
@@ -315,8 +323,10 @@ return (
 {screen === "status" && (
   <div style={{
     position: "absolute",
-    top: 430,
-    left: 365,
+    top: 425,
+left: "50%",
+transform: "translateX(-50%)",
+marginLeft: "25px",
     width: "220px",
     height: "12px",
     background: "rgba(0,255,255,0.2)",
@@ -335,7 +345,9 @@ return (
   <div style={{
     position: "absolute",
     top: 445,
-    left: 510,
+left: "50%",
+transform: "translateX(-50%)",
+marginLeft: "110px",
     color: "cyan",
     textShadow: "0 0 10px cyan",
     fontSize: "22px",
@@ -346,7 +358,16 @@ return (
 )}
 {screen === "status" && (
   <>
-    <div style={{ position: "absolute", top: 650, left: 540, color: "cyan", textShadow: "0 0 10px cyan", fontSize: "30px", zIndex: 10 }}>
+    <div style={{ 
+position: "absolute", 
+top: 650, 
+left: "50%",
+transform: "translateX(-50%)",
+marginLeft: "100px", 
+color: "cyan", 
+textShadow: "0 0 10px cyan", 
+fontSize: "30px", 
+zIndex: 10 }}>
       {abilityPoints}
     </div>
 
@@ -355,7 +376,9 @@ onClick={() => upgradeStat("str")}
   style={{
     position: "absolute",
     top: 510,
-    left: 430,
+left: "50%",
+transform: "translateX(-50%)",
+marginLeft: "-10px",
     color: "cyan",
     textShadow: "0 0 10px cyan",
     fontSize: "30px",
@@ -371,7 +394,9 @@ onClick={() => upgradeStat("vit")}
   style={{
     position: "absolute",
     top: 565,
-    left: 430,
+left: "50%",
+transform: "translateX(-50%)",
+marginLeft: "-10px",
     color: "cyan",
     textShadow: "0 0 10px cyan",
     fontSize: "30px",
@@ -387,7 +412,9 @@ onClick={() => upgradeStat("agi")}
   style={{
     position: "absolute",
     top: 625,
-    left: 430,
+left: "50%",
+transform: "translateX(-50%)",
+marginLeft: "-10px",
     color: "cyan",
     textShadow: "0 0 10px cyan",
     fontSize: "30px",
@@ -403,7 +430,9 @@ onClick={() => upgradeStat("int")}
   style={{
     position: "absolute",
     top: 680,
-    left: 430,
+left: "50%",
+transform: "translateX(-50%)",
+marginLeft: "-10px",
     color: "cyan",
     textShadow: "0 0 10px cyan",
     fontSize: "30px",
@@ -418,7 +447,9 @@ onClick={() => upgradeStat("per")}
   style={{
     position: "absolute",
     top: 745,
-    left: 430,
+left: "50%",
+transform: "translateX(-50%)",
+marginLeft: "-10px",
     color: "cyan",
     textShadow: "0 0 10px cyan",
     fontSize: "30px",
@@ -453,30 +484,42 @@ onClick={() => upgradeStat("per")}
         
 {screen === "gym" && (
   <>
-    <div style={{ position: "absolute", left: 335, top: 765, color: "cyan" }}>
+    <div style={{ position: "absolute", left: "50%",
+transform: "translateX(-50%)",
+marginLeft: "-105px", top: 756, color: "cyan" }}>
       {streak}
     </div>
 
-    <div style={{ position: "absolute", left: 490, top: 765, color: "cyan" }}>
+    <div style={{ position: "absolute", left: "50%",
+transform: "translateX(-50%)",
+marginLeft: "35px", top: 756, color: "cyan" }}>
       {level}
     </div>
 
-    <div style={{ position: "absolute", left: 610, top: 765, color: "cyan" }}>
+    <div style={{ position: "absolute", left: "50%",
+transform: "translateX(-50%)",
+marginLeft: "190px", top: 756, color: "cyan" }}>
       {xp} / 1000
     </div>
   </>
 )}
 {screen === "work" && (
   <>
-    <div style={{ position: "absolute", left: 335, top: 470, color: "cyan" }}>
+    <div style={{ position: "absolute", left: "50%",
+transform: "translateX(-50%)",
+marginLeft: "-115px", top: 465, color: "cyan" }}>
       {streak}
     </div>
 
-    <div style={{ position: "absolute", left: 490, top: 470, color: "cyan" }}>
+    <div style={{ position: "absolute", left: "50%",
+transform: "translateX(-50%)",
+marginLeft: "45px", top: 465, color: "cyan" }}>
       {level}
     </div>
 
-    <div style={{ position: "absolute", left: 610, top: 470, color: "cyan" }}>
+    <div style={{ position: "absolute", left: "50%",
+transform: "translateX(-50%)",
+marginLeft: "195px", top: 465, color: "cyan" }}>
       {xp} / 1000
     </div>
   </>
