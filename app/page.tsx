@@ -258,8 +258,10 @@ alignItems: "flex-start"
 
 
       <div style={{
-width: "900px",
-height: "900px",
+width: "100%",
+maxWidth: "900px",
+height: "auto",
+aspectRatio: "9 / 9",
 
 backgroundImage: `url(${getBackground()})`,
 backgroundSize: "contain",
