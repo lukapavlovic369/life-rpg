@@ -264,7 +264,7 @@ height: "auto",
 aspectRatio: "9 / 9",
 
 backgroundImage: `url(${getBackground()})`,
-backgroundSize: "contain",
+backgroundSize: "100% 100%",
 backgroundRepeat: "no-repeat",
 backgroundPosition: "center",
 backgroundColor: "black",
