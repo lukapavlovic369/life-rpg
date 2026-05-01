@@ -222,58 +222,30 @@ const workTasks: Task[] = [
   { id: "w9", text: "", x: 650, y: 764 },
   { id: "w10", text: "", x: 650, y: 792 },
 ];
-  function getBackground() {
-    if (screen === "status") return "/status.png";
-{screen === "status" && (
-  <>
-<div style={{
-  position: "absolute",
-  top: 100,
-  left: "50%",
-  transform: "translateX(-50%)",
-  fontSize: "80px",
-  color: "cyan",
-  zIndex: 10
-}}>
-  {Math.floor(xp / 1000) + 1}
-</div>
+function getBackground() {
+  if (screen === "status") return "/status.png";
+  if (screen === "gym") return "/gym.png";
+  if (screen === "hygiene") return "/hygiene.png";
+  return "/work.png";
+}
 
-    <div style={{ position: "absolute", top: 360, left: 420, color: "cyan" }}>
-      {xp % 1000} / 1000
-    </div>
-
-    <div style={{ position: "absolute", top: 650, left: 600, color: "cyan" }}>
-      {abilityPoints}
-    </div>
-
-    <div style={{ position: "absolute", top: 700, left: 300, color: "cyan" }}>
-      STR: {stats.str}
-    </div>
-  </>
-)}    
-    if (screen === "gym") return "/gym.png";
-    if (screen === "hygiene") return "/hygiene.png";
-    return "/work.png";
-  }
-
-  return (
-<div style={{
-  height: "100vh",
-  overflow: "hidden",
-  display: "flex",
-  justifyContent: "center",
-  alignItems: "center"
-}}>
-      <div style={{
-        position: "fixed",
-        top: 10,
-        left: "50%",
-        transform: "translateX(-50%)",
-        zIndex: 10,
-        display: "flex",
-        gap: "10px"
-      }}>
-        <button onClick={() => setScreen("status")}>STATUS</button>
+return (
+  <div style={{
+    height: "100vh",
+    overflow: "hidden",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center"
+  }}>
+    <div style={{
+      position: "fixed",
+      top: 10,
+      left: "50%",
+      transform: "translateX(-50%)",
+      zIndex: 10,
+      display: "flex",
+      gap: "10px"
+    }}>        <button onClick={() => setScreen("status")}>STATUS</button>
         <button onClick={() => setScreen("gym")}>GYM</button>
         <button onClick={() => setScreen("hygiene")}>HYGIENE</button>
         <button onClick={() => setScreen("work")}>WORK</button>
