@@ -277,7 +277,7 @@ position: "relative"
       top: 140,
       left: "50%",
       transform: "translateX(-50%)",
-      fontSize: "50px",
+      fontSize: "40px",
       fontWeight: "bold",
       color: "cyan",
       textShadow: "0 0 20px cyan",
