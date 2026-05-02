@@ -274,7 +274,7 @@ position: "relative"
   <>
     <div style={{
       position: "absolute",
-      top: 150,
+      top: 130,
       left: "50%",
       transform: "translateX(-50%)",
       fontSize: "50px",
