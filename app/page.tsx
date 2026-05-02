@@ -271,36 +271,40 @@ backgroundColor: "black",
 position: "relative"
       }}>
 {screen === "status" && (
-  <div style={{
-    position: "absolute",
-    top: 130,
-    left: "50%",
-    transform: "translateX(-50%)",
-    fontSize: "55px",
-    fontWeight: "bold",
-    color: "cyan",
-    textShadow: "0 0 20px cyan",
-    zIndex: 10
-  }}>
-    {level}
-<div style={{
-  position: "absolute",
-  top: 230,
-  left: 80,
-  color: "cyan",
-  textShadow: "0 0 10px cyan",
-  fontSize: "20px",
-  display: "flex",
-  gap: "5px",
-  alignItems: "center"
-}}>
-  <span>{currentHp}</span>
-  <span>/</span>
-  <span>{maxHp}</span>
-</div>
-  </div>
-)}
-        {/* XP HUD */}
+  <>
+    <div style={{
+      position: "absolute",
+      top: 130,
+      left: "50%",
+      transform: "translateX(-50%)",
+      fontSize: "55px",
+      fontWeight: "bold",
+      color: "cyan",
+      textShadow: "0 0 20px cyan",
+      zIndex: 10
+    }}>
+      {level}
+    </div>
+
+    <div style={{
+      position: "absolute",
+      top: 355,
+      left: "50%",
+      transform: "translateX(-50%)",
+      marginLeft: "110px",
+      color: "cyan",
+      textShadow: "0 0 10px cyan",
+      fontSize: "20px",
+      display: "flex",
+      gap: "5px",
+      alignItems: "center"
+    }}>
+      <span>{currentHp}</span>
+      <span>/</span>
+      <span>{maxHp}</span>
+    </div>
+  </>
+)}        {/* XP HUD */}
 {screen === "status" && (
   <div style={{
     position: "absolute",
@@ -346,7 +350,7 @@ marginLeft: "25px",
 {screen === "status" && (
   <div style={{
     position: "absolute",
-    top: 445,
+    top: 440,
 left: "50%",
 transform: "translateX(-50%)",
 marginLeft: "110px",
