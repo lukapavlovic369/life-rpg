@@ -274,10 +274,10 @@ position: "relative"
   <>
     <div style={{
       position: "absolute",
-      top: 140,
+      top: 130,
       left: "50%",
       transform: "translateX(-50%)",
-      fontSize: "40px",
+      fontSize: "30px",
       fontWeight: "bold",
       color: "cyan",
       textShadow: "0 0 20px cyan",
