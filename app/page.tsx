@@ -149,6 +149,7 @@ export default function Page() {
     document.write(html);
     document.close();
 
+
     const installPremiumGateFix = () => {
       const w = window as any;
 
@@ -206,7 +207,11 @@ export default function Page() {
             );
           }
           if (typeof w.levelPaywallStep === "function") w.levelPaywallStep("success");
-          if (typeof w.showLevelPaywall === "function") w.showLevelPaywall();
+        } catch {}
+
+        // Clean the URL so refresh does not replay the Stripe success message.
+        try {
+          window.history.replaceState({}, document.title, window.location.pathname);
         } catch {}
       }
 
@@ -216,18 +221,7 @@ export default function Page() {
           if (isPaid()) {
             markPaid();
             try { if (typeof w.hideLevelPaywall === "function") w.hideLevelPaywall(); } catch {}
-            try {
-              if (typeof w.showSystemMessage === "function") {
-                w.showSystemMessage(
-                  "ASCENSION ACTIVE",
-                  "PAYWALL BYPASSED",
-                  "Your Ascension Pass is active. Continue leveling.",
-                  "rankup",
-                  0,
-                  true
-                );
-              }
-            } catch {}
+            // Premium users silently bypass the paywall.
             return;
           }
           return originalShow.apply(null, Array.from(arguments) as any);
