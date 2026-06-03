@@ -194,14 +194,9 @@ export default function Page() {
 
       const params = new URLSearchParams(window.location.search);
       if (params.get("payment") === "success") {
-        const successMessageKey = "questPaymentSuccessMessageShown";
-        const shouldShowSuccessMessage = localStorage.getItem(successMessageKey) !== "1";
-
         markPaid();
-        localStorage.setItem(successMessageKey, "1");
-
         try {
-          if (shouldShowSuccessMessage && typeof w.showSystemMessage === "function") {
+          if (typeof w.showSystemMessage === "function") {
             w.showSystemMessage(
               "ASCENSION UNLOCKED",
               "PAYMENT CONFIRMED",
@@ -212,11 +207,10 @@ export default function Page() {
             );
           }
           if (typeof w.levelPaywallStep === "function") w.levelPaywallStep("success");
-        } catch {}
-
-        // Clean the URL immediately so refresh does not replay the Stripe success message.
-        try {
-          window.history.replaceState({}, document.title, window.location.pathname);
+          if (typeof w.showLevelPaywall === "function") w.showLevelPaywall();
+          if (window.history?.replaceState) {
+            window.history.replaceState({}, document.title, window.location.pathname);
+          }
         } catch {}
       }
 
@@ -226,7 +220,7 @@ export default function Page() {
           if (isPaid()) {
             markPaid();
             try { if (typeof w.hideLevelPaywall === "function") w.hideLevelPaywall(); } catch {}
-            // Premium users silently bypass the paywall.
+            // Premium user: silently bypass paywall without popup.
             return;
           }
           return originalShow.apply(null, Array.from(arguments) as any);
@@ -241,7 +235,7 @@ export default function Page() {
           if (isPaid()) {
             markPaid();
             try { if (typeof w.levelPaywallStep === "function") w.levelPaywallStep("success"); } catch {}
-            // Already premium: silently skip opening Stripe again.
+            // Premium user: no new checkout needed, no popup.
             return;
           }
           return originalPay.apply(null, Array.from(arguments) as any);
