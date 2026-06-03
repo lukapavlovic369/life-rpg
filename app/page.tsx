@@ -194,9 +194,14 @@ export default function Page() {
 
       const params = new URLSearchParams(window.location.search);
       if (params.get("payment") === "success") {
+        const successMessageKey = "questPaymentSuccessMessageShown";
+        const shouldShowSuccessMessage = localStorage.getItem(successMessageKey) !== "1";
+
         markPaid();
+        localStorage.setItem(successMessageKey, "1");
+
         try {
-          if (typeof w.showSystemMessage === "function") {
+          if (shouldShowSuccessMessage && typeof w.showSystemMessage === "function") {
             w.showSystemMessage(
               "ASCENSION UNLOCKED",
               "PAYMENT CONFIRMED",
@@ -209,7 +214,7 @@ export default function Page() {
           if (typeof w.levelPaywallStep === "function") w.levelPaywallStep("success");
         } catch {}
 
-        // Clean the URL so refresh does not replay the Stripe success message.
+        // Clean the URL immediately so refresh does not replay the Stripe success message.
         try {
           window.history.replaceState({}, document.title, window.location.pathname);
         } catch {}
@@ -236,18 +241,7 @@ export default function Page() {
           if (isPaid()) {
             markPaid();
             try { if (typeof w.levelPaywallStep === "function") w.levelPaywallStep("success"); } catch {}
-            try {
-              if (typeof w.showSystemMessage === "function") {
-                w.showSystemMessage(
-                  "ASCENSION ACTIVE",
-                  "PAYMENT ALREADY CONFIRMED",
-                  "Your pass is active. No new checkout needed.",
-                  "rankup",
-                  0,
-                  true
-                );
-              }
-            } catch {}
+            // Already premium: silently skip opening Stripe again.
             return;
           }
           return originalPay.apply(null, Array.from(arguments) as any);
