@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
@@ -16,6 +16,17 @@ export const metadata: Metadata = {
   title: "Beyond Leveling",
   description: "Level Up Your Real Life",
   manifest: "/manifest.json",
+
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "Beyond Leveling",
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#020711",
+  viewportFit: "cover",
 };
 
 export default function RootLayout({
