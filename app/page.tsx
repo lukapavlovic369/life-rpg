@@ -680,6 +680,269 @@ export default function Page() {
     installBeyondV14PolishPatch();
 
 
+    // V15 HUD/TIMER/NOTIFICATION PATCH: true mirrored fixed HUD bars, no empty bottom gap, no notification burst.
+    const installBeyondV15HudTimerPatch = () => {
+      try {
+        const css = document.createElement("style");
+        css.id = "beyond-v15-hud-timer-css";
+        css.textContent = `
+          @media (max-width:700px){
+            html,body{
+              overflow-x:hidden!important;
+              background:#020711!important;
+              overscroll-behavior-y:none!important;
+            }
+
+            .screen,.status-screen,.hygiene-screen{
+              width:100vw!important;
+              max-width:430px!important;
+              min-height:auto!important;
+              height:auto!important;
+              overflow:visible!important;
+              margin:0 auto!important;
+              padding-top:74px!important;
+              padding-bottom:76px!important;
+            }
+
+            .screen.scroll,.hygiene-screen.scroll,.status-screen.scroll{
+              overflow-y:auto!important;
+              overflow-x:hidden!important;
+              -webkit-overflow-scrolling:touch!important;
+            }
+
+            /*
+              REAL SOLO-STYLE OUTER HUD:
+              top and bottom are the SAME layer, bottom is mirrored.
+              It is fixed to viewport and independent from page content.
+            */
+            .outer-top,.outer-bottom{
+              position:fixed!important;
+              left:max(18px,calc((100vw - 430px)/2 + 18px))!important;
+              right:max(18px,calc((100vw - 430px)/2 + 18px))!important;
+              height:48px!important;
+              border:none!important;
+              border-radius:0!important;
+              transform:none!important;
+              pointer-events:none!important;
+              display:block!important;
+              visibility:visible!important;
+              opacity:1!important;
+              z-index:2147483000!important;
+              filter:drop-shadow(0 0 8px #2ddcff) drop-shadow(0 0 18px #2872ff)!important;
+              background:
+                linear-gradient(90deg,transparent 0 5%,#007bff 8%,#2be8ff 13%,#164fbb 21%,transparent 30%,transparent 70%,#164fbb 79%,#2be8ff 87%,#007bff 92%,transparent 95%),
+                linear-gradient(180deg,rgba(45,220,255,.02),rgba(0,160,255,.55) 45%,rgba(20,90,255,.18) 60%,rgba(0,0,0,0));
+              clip-path:polygon(0 38%,7% 38%,10% 22%,31% 22%,36% 52%,50% 52%,54% 22%,90% 22%,93% 38%,100% 38%,100% 72%,0 72%);
+            }
+            .outer-top{
+              top:max(10px,calc(env(safe-area-inset-top) + 2px))!important;
+            }
+            .outer-bottom{
+              bottom:max(10px,calc(env(safe-area-inset-bottom) + 2px))!important;
+              transform:scaleY(-1)!important;
+            }
+
+            .outer-top::before,.outer-bottom::before{
+              content:""!important;
+              position:absolute!important;
+              left:50%!important;
+              top:50%!important;
+              width:26px!important;
+              height:26px!important;
+              transform:translate(-50%,-50%) rotate(45deg)!important;
+              border:2px solid #8fefff!important;
+              background:radial-gradient(circle,#9df9ff 0 18%,#2b78ff 45%,rgba(0,50,120,.2) 72%)!important;
+              box-shadow:0 0 12px #8fefff,0 0 26px #2872ff!important;
+            }
+
+            /*
+              Hide the older secondary cut bars that looked like random extra frames.
+              Only the true mirrored top/bottom HUD stays visible.
+            */
+            .top-cut,.bottom-cut{
+              display:none!important;
+              opacity:0!important;
+              visibility:hidden!important;
+            }
+
+            body:not(.player-entered) .outer-top,
+            body:not(.player-entered) .outer-bottom{
+              display:none!important;
+              opacity:0!important;
+              visibility:hidden!important;
+            }
+
+            /*
+              The capsule timer must be content, not part of the bottom HUD.
+              Keep it above the mirrored bottom layer and remove the giant blank space.
+            */
+            .capsule-slot{
+              position:relative!important;
+              z-index:20!important;
+              min-height:82px!important;
+              margin:14px auto 18px!important;
+              transform:none!important;
+              pointer-events:auto!important;
+            }
+            .capsule-clock{
+              transform:scale(.82)!important;
+              margin:0 auto!important;
+            }
+
+            .daily-quest-screen .capsule-slot,
+            #dailyQuest .capsule-slot,
+            .screen .capsule-slot{
+              margin-bottom:18px!important;
+            }
+
+            .section:last-child,.card:last-child{
+              margin-bottom:14px!important;
+            }
+          }
+        `;
+        document.head.appendChild(css);
+
+        const script = document.createElement("script");
+        script.id = "beyond-v15-hud-timer-script";
+        script.textContent = `
+(function(){
+  if(window.__beyondV15HudTimerPatch)return;
+  window.__beyondV15HudTimerPatch=true;
+
+  function st(){try{return window.state||state}catch(e){return null}}
+
+  function cleanOldHud(){
+    try{
+      document.body.classList.add('player-entered');
+      document.querySelectorAll('.top-cut,.bottom-cut').forEach(function(el){
+        el.style.display='none';
+        el.style.opacity='0';
+        el.style.visibility='hidden';
+      });
+      document.querySelectorAll('.outer-top,.outer-bottom').forEach(function(el){
+        el.style.display='block';
+        el.style.opacity='1';
+        el.style.visibility='visible';
+      });
+    }catch(e){}
+  }
+
+  function stopNotificationBurst(){
+    try{
+      if(window.__beyondV13NotifyTimers){
+        Object.keys(window.__beyondV13NotifyTimers).forEach(function(k){
+          try{clearTimeout(window.__beyondV13NotifyTimers[k])}catch(e){}
+          delete window.__beyondV13NotifyTimers[k];
+        });
+      }
+    }catch(e){}
+
+    try{
+      var s=st();
+      if(s&&s.questTimers){
+        Object.keys(s.questTimers).forEach(function(k){
+          var t=s.questTimers[k];
+          if(t){
+            t.finalMinuteNotified=false;
+            t.v15Scheduled=false;
+          }
+        });
+        if(typeof save==='function')save();
+      }
+    }catch(e){}
+  }
+
+  function patchNotificationConstructor(){
+    try{
+      if(!('Notification' in window) || window.Notification.__beyondV15Safe)return;
+      var Native=window.Notification;
+      var lastAt=0;
+      var lastText='';
+      var justVisibleUntil=0;
+
+      document.addEventListener('visibilitychange',function(){
+        if(document.visibilityState==='visible'){
+          justVisibleUntil=Date.now()+1800;
+          stopNotificationBurst();
+        }
+      });
+
+      function SafeNotification(title,opts){
+        var now=Date.now();
+        var text=String(title||'')+' '+String(opts&&opts.body||'');
+        if(now<justVisibleUntil)return {};
+        if(text===lastText && now-lastAt<120000)return {};
+        if(now-lastAt<1200)return {};
+        lastAt=now;
+        lastText=text;
+        return new Native(title,opts);
+      }
+      SafeNotification.permission=Native.permission;
+      SafeNotification.requestPermission=Native.requestPermission.bind(Native);
+      SafeNotification.__beyondV15Safe=true;
+      try{Object.setPrototypeOf(SafeNotification,Native)}catch(e){}
+      window.Notification=SafeNotification;
+    }catch(e){}
+  }
+
+  /*
+    The old timer window sometimes blocked the claim click.
+    This makes the countdown overlay never steal pointer events from the claim/check controls.
+  */
+  function freeTimerClicks(){
+    try{
+      document.querySelectorAll('.timer-box,.capsule-slot,.capsule-clock,#questCapsuleClock,#questTime').forEach(function(el){
+        el.style.pointerEvents='none';
+      });
+      document.querySelectorAll('input.check[type="checkbox"],input[type="checkbox"].check,.check,button').forEach(function(el){
+        el.style.pointerEvents='auto';
+      });
+    }catch(e){}
+  }
+
+  function compactCurrentScreen(){
+    try{
+      var active=document.querySelector('.page.active .screen,.screen.active,.page.active .hygiene-screen,.hygiene-screen.active');
+      if(!active)return;
+      active.style.paddingBottom='76px';
+      active.style.minHeight='auto';
+      active.style.height='auto';
+    }catch(e){}
+  }
+
+  cleanOldHud();
+  patchNotificationConstructor();
+  stopNotificationBurst();
+  freeTimerClicks();
+  compactCurrentScreen();
+
+  document.addEventListener('click',function(){
+    setTimeout(function(){cleanOldHud();freeTimerClicks();compactCurrentScreen();},40);
+    setTimeout(function(){cleanOldHud();freeTimerClicks();compactCurrentScreen();},400);
+  },true);
+
+  try{
+    new MutationObserver(function(){
+      cleanOldHud();
+      freeTimerClicks();
+      compactCurrentScreen();
+    }).observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['style','class']});
+  }catch(e){}
+
+  setInterval(function(){
+    cleanOldHud();
+    freeTimerClicks();
+    compactCurrentScreen();
+  },700);
+})();
+        `;
+        document.body.appendChild(script);
+      } catch {}
+    };
+    installBeyondV15HudTimerPatch();
+
+
+
 
     const installPremiumGateFix = () => {
       const w = window as any;
