@@ -590,6 +590,96 @@ export default function Page() {
     installBeyondV13FinalPatch();
 
 
+    // V14 POLISH PATCH: mobile HUD fixed, checkmarks centered, capsule moved out of bottom frame, bad top reward popups removed.
+    const installBeyondV14PolishPatch = () => {
+      try {
+        const css = document.createElement("style");
+        css.id = "beyond-v14-polish-css";
+        css.textContent = `
+          @media (max-width:700px){
+            html,body{width:100%!important;min-height:100svh!important;min-height:100dvh!important;overflow-x:hidden!important;background:#020711!important;}
+            .app{width:100vw!important;max-width:430px!important;margin:0 auto!important;overflow-x:hidden!important;}
+            .screen,.status-screen,.hygiene-screen{
+              width:100vw!important;max-width:430px!important;
+              min-height:100svh!important;min-height:100dvh!important;height:auto!important;
+              overflow:visible!important;
+              padding-top:82px!important;
+              padding-bottom:124px!important;
+              margin:0 auto!important;
+            }
+            .screen.scroll,.hygiene-screen.scroll,.status-screen.scroll{overflow-y:auto!important;overflow-x:hidden!important;-webkit-overflow-scrolling:touch!important;}
+            .ui,.status-ui{position:relative!important;z-index:8!important;}
+
+            .outer-top,.top-cut,.outer-bottom,.bottom-cut{
+              position:fixed!important;display:block!important;visibility:visible!important;opacity:1!important;
+              pointer-events:none!important;z-index:99991!important;filter:drop-shadow(0 0 7px #27d9ff) drop-shadow(0 0 16px #2772ff)!important;
+            }
+            .outer-top{top:max(8px,env(safe-area-inset-top))!important;left:max(22px,calc((100vw - 430px)/2 + 22px))!important;right:max(22px,calc((100vw - 430px)/2 + 22px))!important;height:42px!important;border-top:4px solid #20cfff!important;border-right:4px solid #20cfff!important;transform:skewX(-34deg)!important;}
+            .top-cut{top:max(5px,env(safe-area-inset-top))!important;left:max(48px,calc((100vw - 430px)/2 + 48px))!important;width:calc(min(100vw,430px) - 96px)!important;height:28px!important;border-top:3px solid #8fefff!important;}
+            .outer-bottom{bottom:max(16px,env(safe-area-inset-bottom))!important;left:max(28px,calc((100vw - 430px)/2 + 28px))!important;right:max(28px,calc((100vw - 430px)/2 + 28px))!important;height:44px!important;border-bottom:4px solid #20cfff!important;border-right:4px solid #20cfff!important;transform:skewX(-34deg)!important;}
+            .bottom-cut{bottom:max(9px,env(safe-area-inset-bottom))!important;left:max(52px,calc((100vw - 430px)/2 + 52px))!important;width:calc(min(100vw,430px) - 104px)!important;height:30px!important;border-bottom:3px solid #8fefff!important;}
+            body:not(.player-entered) .outer-bottom,body:not(.player-entered) .bottom-cut{display:block!important;opacity:1!important;visibility:visible!important;}
+
+            .capsule-slot{position:relative!important;z-index:25!important;margin:10px auto 90px!important;min-height:78px!important;transform:translateY(-54px)!important;pointer-events:none!important;}
+            .capsule-clock{position:relative!important;z-index:26!important;transform:scale(.82)!important;}
+
+            .exercise{grid-template-columns:28px minmax(0,1fr) auto 34px 38px!important;column-gap:5px!important;overflow:visible!important;padding-right:6px!important;}
+            .hygiene-screen .row{grid-template-columns:50px minmax(0,1fr) 34px 34px 38px!important;column-gap:6px!important;padding-right:6px!important;overflow:visible!important;}
+            .bonus-item{grid-template-columns:50px minmax(0,1fr) 34px 34px 38px!important;column-gap:6px!important;padding-right:6px!important;overflow:visible!important;}
+          }
+
+          input.check[type="checkbox"],input[type="checkbox"].check,.check{
+            width:36px!important;height:36px!important;min-width:36px!important;max-width:36px!important;
+            border:3px solid #8fefff!important;border-radius:9px!important;
+            background:rgba(0,18,48,.72)!important;background-repeat:no-repeat!important;background-position:center!important;background-size:25px 25px!important;
+            box-shadow:0 0 15px rgba(101,216,255,.95),inset 0 0 12px rgba(101,216,255,.25)!important;
+            appearance:none!important;-webkit-appearance:none!important;display:block!important;position:relative!important;place-self:center!important;margin:0 auto!important;padding:0!important;box-sizing:border-box!important;
+          }
+          input.check[type="checkbox"]::before,input.check[type="checkbox"]::after,input[type="checkbox"].check::before,input[type="checkbox"].check::after,.check::before,.check::after{content:none!important;display:none!important;}
+          input.check[type="checkbox"]:checked,input[type="checkbox"].check:checked,.check:checked{
+            background-color:rgba(143,239,255,.18)!important;
+            background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M7 16.5 L13.2 22.5 L25 9' fill='none' stroke='%23eaffff' stroke-width='5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")!important;
+            animation:beyondV14CheckPop .28s cubic-bezier(.16,.95,.2,1.25) both!important;
+            box-shadow:0 0 20px rgba(143,239,255,1),0 0 34px rgba(40,114,255,.75),inset 0 0 14px rgba(143,239,255,.35)!important;
+          }
+          @keyframes beyondV14CheckPop{0%{transform:scale(.72);filter:brightness(1.7)}70%{transform:scale(1.13)}100%{transform:scale(1)}}
+
+          .xp-popup,.xp-float,.stat-popup,.stat-float,.floating-xp,.floating-stat,.beyond-xp-float-v9,.reward-popup,.quest-reward-popup{display:none!important;opacity:0!important;visibility:hidden!important;}
+          .beyond-v12-reward-float{
+            position:fixed!important;z-index:999999!important;pointer-events:none!important;min-width:92px!important;text-align:center!important;
+            color:#eaffff!important;font:900 14px Arial,Helvetica,sans-serif!important;letter-spacing:1px!important;
+            text-shadow:0 0 8px #65d8ff,0 0 16px #2872ff!important;background:rgba(0,24,52,.88)!important;
+            border:1px solid rgba(143,239,255,.98)!important;box-shadow:0 0 14px rgba(101,216,255,.75),inset 0 0 8px rgba(101,216,255,.18)!important;
+            padding:7px 9px!important;clip-path:polygon(8% 0,92% 0,100% 18%,100% 82%,92% 100%,8% 100%,0 82%,0 18%)!important;
+            animation:beyondV14RewardFloat .82s ease-out forwards!important;
+          }
+          .beyond-v12-reward-float .stat{display:block!important;margin-top:2px!important;font-size:11px!important;color:#9df9ff!important;letter-spacing:1.3px!important;}
+          @keyframes beyondV14RewardFloat{0%{opacity:0;transform:translate(-50%,2px) scale(.86);filter:blur(2px)}16%{opacity:1;transform:translate(-50%,-12px) scale(1)}100%{opacity:0;transform:translate(-50%,-54px) scale(.96);filter:blur(.3px)}}
+        `;
+        document.head.appendChild(css);
+
+        const script = document.createElement("script");
+        script.id = "beyond-v14-polish-script";
+        script.textContent = `
+(function(){
+  if(window.__beyondV14PolishPatch)return;
+  window.__beyondV14PolishPatch=true;
+  function isBadRewardNode(el){try{if(!el||el.nodeType!==1)return false;var cls=String(el.className||'');if(cls.indexOf('beyond-v12-reward-float')>=0)return false;var txt=String(el.textContent||'').trim();if(!/^\+\d+\s*XP/i.test(txt)&&txt.indexOf('+STR')<0&&txt.indexOf('+AURA')<0&&txt.indexOf('+INT')<0&&txt.indexOf('+EGO')<0)return false;var cs=getComputedStyle(el);return cs.position==='fixed'||cs.position==='absolute'}catch(e){return false}}
+  function killBadRewardPopups(){try{Array.prototype.slice.call(document.body.children).forEach(function(el){if(isBadRewardNode(el))el.remove()})}catch(e){}}
+  function keepHudAlive(){try{document.body.classList.add('player-entered');['outer-top','top-cut','outer-bottom','bottom-cut'].forEach(function(c){document.querySelectorAll('.'+c).forEach(function(el){el.style.display='block';el.style.visibility='visible';el.style.opacity='1';})})}catch(e){}}
+  function fixCheckedVisuals(){try{document.querySelectorAll('input.check[type="checkbox"],input[type="checkbox"].check,input[type="checkbox"]').forEach(function(el){if(el.checked)el.setAttribute('data-beyond-checked','1')})}catch(e){}}
+  document.addEventListener('click',function(ev){setTimeout(function(){killBadRewardPopups();keepHudAlive();fixCheckedVisuals()},30);setTimeout(function(){killBadRewardPopups();keepHudAlive();fixCheckedVisuals()},250)},true);
+  try{new MutationObserver(function(){killBadRewardPopups();keepHudAlive();fixCheckedVisuals()}).observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['style','class','checked']})}catch(e){}
+  setInterval(function(){killBadRewardPopups();keepHudAlive();fixCheckedVisuals()},800);
+  setTimeout(function(){killBadRewardPopups();keepHudAlive();fixCheckedVisuals()},400);
+})();
+        `;
+        document.body.appendChild(script);
+      } catch {}
+    };
+    installBeyondV14PolishPatch();
+
+
 
     const installPremiumGateFix = () => {
       const w = window as any;
