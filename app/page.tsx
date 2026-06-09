@@ -474,8 +474,8 @@ export default function Page() {
     document.write(html);
     document.close();
 
-    // V12 FINAL PATCH: persistent Supabase progress, username-once, iPhone HUD, reward popup, aura lock, notifications.
-    const installBeyondV12FinalPatch = () => {
+    // V13 FINAL PATCH: Supabase save fix, bigger checks, correct stat logic, bottom HUD/timer polish.
+    const installBeyondV13FinalPatch = () => {
       try {
         const css = document.createElement("style");
         css.id = "beyond-v12-final-css";
@@ -514,22 +514,19 @@ export default function Page() {
             .bottom-cut{left:max(54px,calc((100vw - 430px)/2 + 54px))!important;width:275px!important;height:38px!important;}
             body:not(.player-entered) .outer-bottom,body:not(.player-entered) .bottom-cut{display:none!important;opacity:0!important;visibility:hidden!important;}
           }
-          input.check[type="checkbox"],.check{
-            position:relative!important;width:22px!important;height:22px!important;min-width:22px!important;
-            appearance:none!important;-webkit-appearance:none!important;border:2px solid #85dfff!important;border-radius:4px!important;
-            background:rgba(0,20,50,.44)!important;display:inline-grid!important;place-items:center!important;overflow:visible!important;
-          }
-          input.check[type="checkbox"]::before,.check::before{
-            content:""!important;position:absolute!important;width:8px!important;height:14px!important;left:5px!important;top:1px!important;
-            border-right:3px solid #fff!important;border-bottom:3px solid #fff!important;transform:rotate(45deg) scale(.45)!important;opacity:0!important;
-            filter:drop-shadow(0 0 5px #fff) drop-shadow(0 0 11px #65d8ff)!important;
-          }
+          input.check[type="checkbox"],.check{width:40px!important;height:40px!important;min-width:40px!important;border:3px solid #8fefff!important;border-radius:8px!important;background:rgba(0,20,50,.50)!important;box-shadow:0 0 18px rgba(101,216,255,.95),inset 0 0 11px rgba(101,216,255,.22)!important;display:grid!important;place-items:center!important;position:relative!important;appearance:none!important;-webkit-appearance:none!important;}
+          input.check[type="checkbox"]::before,.check::before{content:""!important;width:20px!important;height:30px!important;border-right:5px solid #dfffff!important;border-bottom:5px solid #dfffff!important;transform:rotate(45deg) scale(.25)!important;opacity:0!important;filter:drop-shadow(0 0 8px #8fefff) drop-shadow(0 0 14px #2872ff)!important;}
           input.check[type="checkbox"]:checked::before,.check:checked::before{animation:beyondV12CheckDraw .34s cubic-bezier(.16,.95,.2,1.1) forwards!important;opacity:1!important;}
           @keyframes beyondV12CheckDraw{0%{opacity:0;clip-path:inset(0 100% 100% 0);transform:rotate(45deg) scale(.45)}55%{opacity:1;clip-path:inset(0 35% 0 0);transform:rotate(45deg) scale(.98)}100%{opacity:1;clip-path:inset(0 0 0 0);transform:rotate(45deg) scale(1)}}
           .xp-popup,.xp-float,.stat-popup,.stat-float,.floating-xp,.floating-stat,.beyond-xp-float-v9{display:none!important;}
           .beyond-v12-reward-float{position:fixed!important;z-index:999999!important;pointer-events:none!important;min-width:82px!important;text-align:center!important;color:#eaffff!important;font:900 13px Arial,Helvetica,sans-serif!important;letter-spacing:1px!important;text-shadow:0 0 8px #65d8ff,0 0 16px #2872ff!important;background:rgba(0,24,52,.82)!important;border:1px solid rgba(143,239,255,.95)!important;box-shadow:0 0 12px rgba(101,216,255,.68),inset 0 0 8px rgba(101,216,255,.15)!important;padding:6px 8px!important;clip-path:polygon(8% 0,92% 0,100% 18%,100% 82%,92% 100%,8% 100%,0 82%,0 18%)!important;animation:beyondV12RewardFloat .95s ease-out forwards!important;}
           .beyond-v12-reward-float .stat{display:block!important;margin-top:2px!important;font-size:10px!important;color:#9df9ff!important;letter-spacing:1.3px!important;}
-          @keyframes beyondV12RewardFloat{0%{opacity:0;transform:translate(-50%,0) scale(.86);filter:blur(2px)}13%{opacity:1;transform:translate(-50%,-9px) scale(1)}100%{opacity:0;transform:translate(-50%,-48px) scale(.96);filter:blur(.4px)}}
+          @keyframes beyondV12RewardFloat{0%{opacity:0;transform:translate(-50%,0) scale(.86);filter:blur(2px)}13%{opacity:1;transform:translate(-50%,-9px) scale(1)}
+          .capsule-slot{position:relative!important;z-index:20!important;margin-bottom:58px!important;}
+          .capsule-clock{z-index:21!important;}
+          .outer-bottom,.bottom-cut,.frame,.frame2{pointer-events:none!important;}
+          @supports (padding: max(0px)){.outer-top,.top-cut{top:max(6px,env(safe-area-inset-top))!important}.outer-bottom,.bottom-cut{bottom:max(10px,env(safe-area-inset-bottom))!important}}
+100%{opacity:0;transform:translate(-50%,-48px) scale(.96);filter:blur(.4px)}}
         `;
         document.head.appendChild(css);
 
@@ -537,11 +534,11 @@ export default function Page() {
         script.id = "beyond-v12-final-script";
         script.textContent = `
 (function(){
-  if(window.__beyondV12FinalPatch)return;
-  window.__beyondV12FinalPatch=true;
+  if(window.__beyondV13FinalPatch)return;
+  window.__beyondV13FinalPatch=true;
   var AURA_UNLOCK_LEVEL=5;
   var syncTimer=null;
-  var notifyTimers=window.__beyondV12NotifyTimers||(window.__beyondV12NotifyTimers={});
+  var notifyTimers=window.__beyondV13NotifyTimers||(window.__beyondV13NotifyTimers={});
 
   try{Object.defineProperty(window,'state',{configurable:true,get:function(){return state},set:function(v){state=v||state}})}catch(e){try{window.state=state}catch(_){}}
   try{window.save=save;window.render=render;window.applyPathMenu=applyPathMenu}catch(e){}
@@ -551,7 +548,7 @@ export default function Page() {
   function auraUnlocked(){var st=s()||{};return Number(st.level||1)>=AURA_UNLOCK_LEVEL||!!st.auraUnlocked||!!(st.statsUnlocked&&st.statsUnlocked.aura)||!!(st.unlockedStats&&st.unlockedStats.aura)}
   function isHC(id){id=String(id||'');return id.startsWith('h-')||id.startsWith('hc-')}
   function isTimed(id){id=String(id||'');if(!id||isHC(id))return false;return id.startsWith('g-')||id.startsWith('side-')||id.startsWith('biz-custom-')||id.startsWith('biz-')}
-  function statFor(id){id=String(id||'');if(id.startsWith('g-')||id.startsWith('h-')||id.startsWith('hc-'))return 'STR';if(id.startsWith('biz-')||id.startsWith('side-'))return auraUnlocked()?'AURA':'INT';return 'STR'}
+  function statFor(id){id=String(id||'');if(id.startsWith('g-'))return 'STR';if(id.startsWith('h-')||id.startsWith('hc-'))return auraUnlocked()?'AURA':'';if(id.startsWith('side-'))return 'EGO';if(id.startsWith('biz-')||id.startsWith('biz-custom-'))return 'INT';return 'STR'}
   function completed(st){st=st||s()||{};var checks=st.checks||{};return Object.keys(checks).filter(function(k){return !!checks[k]})}
   function unlocked(st){st=st||s()||{};var lvl=Number(st.level||1);var out=[];try{Object.keys(MODULE_ROADMAP||{}).forEach(function(k){if(lvl>=Number(MODULE_ROADMAP[k].level||1))out.push(k)})}catch(e){};try{if(st.gymPart2Unlocked||lvl>=3)out.push('gym-part-2')}catch(e){};return Array.from(new Set(out))}
   function payload(user,profile){var st=s()||{};var checks=st.checks||{};var setProgress=st.setProgress||{};var stats=Object.assign({AURA:0,EGO:0,STR:0,INT:0},st.stats||{});if(!auraUnlocked())stats.AURA=Number((profile&&profile.stats&&profile.stats.AURA)||0)||0;var name=cleanName(st.username||st.playerName||st.leaderboardName||localStorage.questPlayerUsername||user.email);return {id:user.id,email:user.email,username:name,player_name:name,display_name:name,role:(profile&&profile.role)||st.role||'player',is_premium:(profile&&profile.is_premium)!=null?!!profile.is_premium:!!st.isPremium,level:Number(st.level||1),xp:Number(st.xp||0),stats:stats,checks:checks,completed_quests:completed(st),unlocked_quests:unlocked(st),set_progress:setProgress,profile_state:st,updated_at:new Date().toISOString()}}
@@ -568,11 +565,11 @@ export default function Page() {
   async function autoEnterIfProfileExists(){try{var ss=await session();var user=ss&&ss.user;if(!user)return false;var p=await profileFor(user);var nm=cleanName((p&&(p.username||p.player_name||p.display_name))||'');if(p&&nm&&nm!=='PLAYER'){await window.__beyondLoadProgress();localStorage.questPlayerAccepted='1';localStorage.playerEntered='true';localStorage.questGoogleIntroAccepted='1';document.body.classList.add('player-entered');var shell=document.getElementById('introShell');if(shell)shell.style.display='none';try{render();applyPathMenu()}catch(e){}return true}return false}catch(e){return false}}
   function patchUsernameOnce(){try{if(window.acceptPlayer&&!window.acceptPlayer.__v12UsernameOnce){var oldAccept=window.acceptPlayer;window.acceptPlayer=async function(){if(await autoEnterIfProfileExists())return;return oldAccept.apply(this,arguments)};window.acceptPlayer.__v12UsernameOnce=true}if(window.enterApp&&!window.enterApp.__v12UsernameOnce){var oldEnter=window.enterApp;window.enterApp=async function(){var input=document.getElementById('playerUsername');var nm=cleanName(input&&input.value?input.value:'PLAYER');var res=await window.__beyondSaveLeaderboardName(nm);if(res&&res.error){alert('PROFILE SAVE ERROR: '+res.error);return}return oldEnter.apply(this,arguments)};window.enterApp.__v12UsernameOnce=true}}catch(e){}}
 
-  function showReward(el,xp,stat){try{xp=Number(xp)||0;if(!el||xp<=0)return;var r=el.getBoundingClientRect();var b=document.createElement('div');b.className='beyond-v12-reward-float';b.style.left=(r.left+r.width/2)+'px';b.style.top=(r.top-12)+'px';b.innerHTML='+'+xp+' XP<span class="stat">+'+stat+'</span>';document.body.appendChild(b);setTimeout(function(){try{b.remove()}catch(e){}},1000)}catch(e){}}
-  function patchAuraAndPopup(){try{if(window.showXPGain&&!window.showXPGain.__v12hide){window.showXPGain.__v12hide=true;var sx=window.showXPGain;window.showXPGain=function(){return null};window.showXPGain.__v12hide=true;try{showXPGain=window.showXPGain}catch(e){}}try{if(typeof getQuestStat==='function'&&!window.__v12GetQuestStat){window.__v12GetQuestStat=getQuestStat;getQuestStat=function(id){var forced=statFor(id);return forced||window.__v12GetQuestStat(id)}}}catch(e){}if(window.addQuestStat&&!window.addQuestStat.__v12Aura){var os=window.addQuestStat;window.addQuestStat=function(id,el){if(String(id||'').startsWith('side-')&&!auraUnlocked()){var st=s();st.stats=st.stats||{AURA:0,EGO:0,STR:0,INT:0};st.stats.INT=(st.stats.INT||0)+1;return null}if(isHC(id)){var st2=s();st2.stats=st2.stats||{AURA:0,EGO:0,STR:0,INT:0};st2.stats.STR=(st2.stats.STR||0)+1;return null}return os.apply(this,arguments)};window.addQuestStat.__v12Aura=true;try{addQuestStat=window.addQuestStat}catch(e){}}if(window.toggleQuest&&!window.toggleQuest.__v12Reward){var ot=window.toggleQuest;window.toggleQuest=function(id,xp,el){var st=s();var was=!!(st&&st.checks&&st.checks[String(id)]);var res=ot.apply(this,arguments);setTimeout(function(){var now=!!(s()&&s().checks&&s().checks[String(id)]);if(!was&&now&&Number(xp)>0){if(el)el.checked=true;showReward(el,Number(xp),statFor(id));window.__beyondRequestProgressSync()}},70);return res};window.toggleQuest.__v12Reward=true;try{toggleQuest=window.toggleQuest}catch(e){}}}catch(e){}}
+  function showReward(el,xp,stat){try{xp=Number(xp)||0;if(!el||xp<=0)return;var r=el.getBoundingClientRect();var b=document.createElement('div');b.className='beyond-v12-reward-float';b.style.left=(r.left+r.width/2)+'px';b.style.top=(r.top-12)+'px';b.innerHTML='+'+xp+' XP'+(stat?'<span class="stat">+'+stat+'</span>':'');document.body.appendChild(b);setTimeout(function(){try{b.remove()}catch(e){}},1000)}catch(e){}}
+  function patchAuraAndPopup(){try{if(window.showXPGain&&!window.showXPGain.__v12hide){window.showXPGain.__v12hide=true;var sx=window.showXPGain;window.showXPGain=function(){return null};window.showXPGain.__v12hide=true;try{showXPGain=window.showXPGain}catch(e){}}try{if(typeof getQuestStat==='function'&&!window.__v12GetQuestStat){window.__v12GetQuestStat=getQuestStat;getQuestStat=function(id){var forced=statFor(id);return forced||window.__v12GetQuestStat(id)}}}catch(e){}if(window.addQuestStat&&!window.addQuestStat.__v13Stats){var os=window.addQuestStat;window.addQuestStat=function(id,el){var sf=statFor(id);if(!sf)return null;var st=s();st.stats=st.stats||{AURA:0,EGO:0,STR:0,INT:0};st.stats[sf]=(st.stats[sf]||0)+1;return null};window.addQuestStat.__v13Stats=true;try{addQuestStat=window.addQuestStat}catch(e){}}if(window.toggleQuest&&!window.toggleQuest.__v12Reward){var ot=window.toggleQuest;window.toggleQuest=function(id,xp,el){var st=s();var was=!!(st&&st.checks&&st.checks[String(id)]);var res=ot.apply(this,arguments);setTimeout(function(){var now=!!(s()&&s().checks&&s().checks[String(id)]);if(!was&&now&&Number(xp)>0){if(el)el.checked=true;showReward(el,Number(xp),statFor(id));window.__beyondRequestProgressSync()}},70);return res};window.toggleQuest.__v12Reward=true;try{toggleQuest=window.toggleQuest}catch(e){}}}catch(e){}}
 
   function patchSaveSync(){try{if(window.save&&!window.save.__v12Sync){var os=window.save;window.save=function(){var r=os.apply(this,arguments);try{window.__beyondRequestProgressSync()}catch(e){}return r};window.save.__v12Sync=true;try{save=window.save}catch(e){}}if(window.addXP&&!window.addXP.__v12Sync){var ox=window.addXP;window.addXP=function(xp){var r=ox.apply(this,arguments);try{window.__beyondRequestProgressSync()}catch(e){}return r};window.addXP.__v12Sync=true;try{addXP=window.addXP}catch(e){}}}catch(e){}}
-  function directCompleteHC(id,xp,el){var st=s();if(!st)return false;id=String(id);if(st.checks&&st.checks[id])return null;st.checks=st.checks||{};st.checks[id]=true;if(el)el.checked=true;if(Number(xp)>0&&typeof addXP==='function')addXP(Number(xp));st.stats=st.stats||{AURA:0,EGO:0,STR:0,INT:0};var sf=statFor(id);st.stats[sf]=(st.stats[sf]||0)+1;showReward(el,Number(xp)||0,sf);try{save();render()}catch(e){}try{window.__beyondRequestProgressSync()}catch(e){}return false}
+  function directCompleteHC(id,xp,el){var st=s();if(!st)return false;id=String(id);if(st.checks&&st.checks[id])return null;st.checks=st.checks||{};st.checks[id]=true;if(el)el.checked=true;if(Number(xp)>0&&typeof addXP==='function')addXP(Number(xp));st.stats=st.stats||{AURA:0,EGO:0,STR:0,INT:0};var sf=statFor(id);if(sf){st.stats[sf]=(st.stats[sf]||0)+1}showReward(el,Number(xp)||0,sf);try{save();render()}catch(e){}try{window.__beyondRequestProgressSync()}catch(e){}return false}
   function patchNoTimerHC(){try{if(window.startQuestTimer&&!window.startQuestTimer.__v12NoHC){var os=window.startQuestTimer;window.startQuestTimer=function(id,xp){if(isHC(id))return false;var r=os.apply(this,arguments);setTimeout(function(){scheduleLastMinute(id)},100);return r};window.startQuestTimer.__v12NoHC=true;try{startQuestTimer=window.startQuestTimer}catch(e){}}if(window.toggleQuest&&!window.toggleQuest.__v12NoHC){var ot=window.toggleQuest;window.toggleQuest=function(id,xp,el){if(isHC(id)){var done=directCompleteHC(id,xp,el);if(done===null)return ot.apply(this,arguments);return done}return ot.apply(this,arguments)};window.toggleQuest.__v12NoHC=true;try{toggleQuest=window.toggleQuest}catch(e){}}}catch(e){}}
   function questName(id){try{if(typeof questLabel==='function')return questLabel(id)}catch(e){}return 'Quest'}
   function notify(title,body){try{if('Notification'in window&&Notification.permission==='granted')new Notification(title,{body:body||'',icon:'/icon-192.png',badge:'/icon-192.png'})}catch(e){}try{if(navigator.vibrate)navigator.vibrate([160,70,160])}catch(e){}try{if(typeof window.testQuestNotice==='function'){} }catch(e){}}
@@ -590,7 +587,7 @@ export default function Page() {
         document.body.appendChild(script);
       } catch {}
     };
-    installBeyondV12FinalPatch();
+    installBeyondV13FinalPatch();
 
 
 
