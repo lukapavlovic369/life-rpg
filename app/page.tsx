@@ -616,8 +616,8 @@ export default function Page() {
             }
             .outer-top{top:max(8px,env(safe-area-inset-top))!important;left:max(22px,calc((100vw - 430px)/2 + 22px))!important;right:max(22px,calc((100vw - 430px)/2 + 22px))!important;height:42px!important;border-top:4px solid #20cfff!important;border-right:4px solid #20cfff!important;transform:skewX(-34deg)!important;}
             .top-cut{top:max(5px,env(safe-area-inset-top))!important;left:max(48px,calc((100vw - 430px)/2 + 48px))!important;width:calc(min(100vw,430px) - 96px)!important;height:28px!important;border-top:3px solid #8fefff!important;}
-            .outer-bottom{bottom:max(16px,env(safe-area-inset-bottom))!important;left:max(28px,calc((100vw - 430px)/2 + 28px))!important;right:max(28px,calc((100vw - 430px)/2 + 28px))!important;height:44px!important;border-bottom:4px solid #20cfff!important;border-right:4px solid #20cfff!important;transform:skewX(-34deg)!important;}
-            .bottom-cut{bottom:max(9px,env(safe-area-inset-bottom))!important;left:max(52px,calc((100vw - 430px)/2 + 52px))!important;width:calc(min(100vw,430px) - 104px)!important;height:30px!important;border-bottom:3px solid #8fefff!important;}
+            .outer-bottom{bottom:max(8px,env(safe-area-inset-bottom))!important;left:max(22px,calc((100vw - 430px)/2 + 22px))!important;right:max(22px,calc((100vw - 430px)/2 + 22px))!important;height:42px!important;border-bottom:4px solid #20cfff!important;border-right:4px solid #20cfff!important;transform:skewX(-34deg)!important;}
+            .bottom-cut{bottom:max(5px,env(safe-area-inset-bottom))!important;left:max(48px,calc((100vw - 430px)/2 + 48px))!important;width:calc(min(100vw,430px) - 96px)!important;height:28px!important;border-bottom:3px solid #8fefff!important;}
             body:not(.player-entered) .outer-bottom,body:not(.player-entered) .bottom-cut{display:block!important;opacity:1!important;visibility:visible!important;}
 
             .capsule-slot{position:relative!important;z-index:25!important;margin:10px auto 90px!important;min-height:78px!important;transform:translateY(-54px)!important;pointer-events:none!important;}
