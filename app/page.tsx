@@ -573,7 +573,7 @@ export default function Page() {
   function patchNoTimerHC(){try{if(window.startQuestTimer&&!window.startQuestTimer.__v12NoHC){var os=window.startQuestTimer;window.startQuestTimer=function(id,xp){if(isHC(id))return false;var r=os.apply(this,arguments);setTimeout(function(){scheduleLastMinute(id)},100);return r};window.startQuestTimer.__v12NoHC=true;try{startQuestTimer=window.startQuestTimer}catch(e){}}if(window.toggleQuest&&!window.toggleQuest.__v12NoHC){var ot=window.toggleQuest;window.toggleQuest=function(id,xp,el){if(isHC(id)){var done=directCompleteHC(id,xp,el);if(done===null)return ot.apply(this,arguments);return done}return ot.apply(this,arguments)};window.toggleQuest.__v12NoHC=true;try{toggleQuest=window.toggleQuest}catch(e){}}}catch(e){}}
   function questName(id){try{if(typeof questLabel==='function')return questLabel(id)}catch(e){}return 'Quest'}
   function notify(title,body){try{if('Notification'in window&&Notification.permission==='granted')new Notification(title,{body:body||'',icon:'/icon-192.png',badge:'/icon-192.png'})}catch(e){}try{if(navigator.vibrate)navigator.vibrate([160,70,160])}catch(e){}try{if(typeof window.testQuestNotice==='function'){} }catch(e){}}
-  function scheduleLastMinute(id){try{id=String(id||'');if(!isTimed(id))return;var st=s();var t=st&&st.questTimers&&st.questTimers[id];if(!t||st.checks&&st.checks[id]||t.finalMinuteNotified)return;if(notifyTimers[id])clearTimeout(notifyTimers[id]);var duration=Number(t.duration||300000);var elapsed=Date.now()-Number(t.start||0);var delay=Math.max(0,duration-60000-elapsed);notifyTimers[id]=setTimeout(function(){var live=s();if(!live||live.checks&&live.checks[id])return;var lt=live.questTimers&&live.questTimers[id];if(!lt||lt.finalMinuteNotified)return;lt.finalMinuteNotified=true;try{save()}catch(e){}notify("DON'T DISAPPEAR.",questName(id)+': zadnja minuta prije isteka.');},delay)}catch(e){}}
+  function scheduleLastMinute(id){try{id=String(id||'');if(!isTimed(id))return;var st=s();var t=st&&st.questTimers&&st.questTimers[id];if(!t||st.checks&&st.checks[id])return;if(notifyTimers[id])clearTimeout(notifyTimers[id]);var duration=Number(t.duration||300000);var elapsed=Date.now()-Number(t.start||0);var delay=Math.max(0,duration-60000-elapsed);notifyTimers[id]=setTimeout(function(){var live=s();if(!live||live.checks&&live.checks[id])return;var lt=live.questTimers&&live.questTimers[id];if(!lt)return;lt.finalMinuteNotified=true;try{save()}catch(e){}notify("DON'T DISAPPEAR.",questName(id)+': zadnja minuta prije isteka.');},delay)}catch(e){}}
   function rescheduleAll(){try{var st=s();var timers=st&&st.questTimers||{};Object.keys(timers).forEach(scheduleLastMinute)}catch(e){}}
   function requestNotifications(){try{if('Notification'in window&&Notification.permission==='default')Notification.requestPermission().catch(function(){})}catch(e){}}
 
@@ -1375,10 +1375,10 @@ export default function Page() {
           document.body.appendChild(layer);
         }
 
-        // Static PNG HUD layers disabled because image files were removed from /public/hud.
-        // Keeping this empty prevents broken-image '?' markers and leftover divider artifacts.
-        layer.innerHTML = ``;
-        layer.style.display = "none";
+        layer.innerHTML = `
+          <img class="static-hud-layer static-hud-top" src="/hud/top-layer.png" alt="" />
+          <img class="static-hud-layer static-hud-bottom" src="/hud/bottom-layer.png" alt="" />
+        `;
 
         document.body.classList.remove("beyond-gate-opening");
         document.body.classList.remove("beyond-gate-hide-content");
@@ -1475,191 +1475,128 @@ export default function Page() {
   }, []);
 
 
-
   useEffect(() => {
-    const installNotificationAndHudCleanup = () => {
+    const installGlobalTimerClickFix = () => {
       try {
-        const cssId = "beyond-final-notification-hud-cleanup";
-        let css = document.getElementById(cssId);
-        if (!css) {
-          css = document.createElement("style");
-          css.id = cssId;
-          css.textContent = `
-            #beyond-static-hud-v1,
-            #beyond-static-hud-v1 *,
-            .static-hud-layer,
-            .static-hud-top,
-            .static-hud-bottom,
-            .top-cut,
-            .bottom-cut,
-            .hud-top,
-            .hud-bottom,
-            .hud-top-layer,
-            .hud-bottom-layer,
-            .custom-hud-top-ornament,
-            .custom-hud-bottom-ornament,
-            .statusHudTopV37,
-            .statusHudBottomV37,
-            .statusHudTopSoftV37,
-            .statusHudBottomSoftV37,
-            .statusHudRailV77,
-            .systemHudTopV77,
-            .systemHudBottomV77,
-            #beyond-system-frame-v78,
-            #beyond-asset-gate-v80,
-            #beyond-asset-gate-v93,
-            #beyond-asset-gate-v94,
-            #beyond-asset-gate-v95,
-            #beyond-asset-gate-v96 {
-              display:none!important;
-              opacity:0!important;
-              visibility:hidden!important;
-              pointer-events:none!important;
-            }
+        const old = document.getElementById("beyond-global-timer-click-fix");
+        if (old) old.remove();
 
-            .capsule-slot,
-            .capsule-clock,
-            .timer-box,
-            .timerBox,
-            .timer-overlay,
-            .quest-timer,
-            .timer-circle {
-              pointer-events:auto!important;
-            }
+        const css = document.createElement("style");
+        css.id = "beyond-global-timer-click-fix";
+        css.textContent = `
+          /* GLOBAL TIMER CLICK FIX
+             Works for every timed quest now and future/unlocked quests:
+             Gym Part 1, Gym Part 2, Side Hustle, Daily Job, Bonus Objectives. */
+          #questTimerOverlay,
+          #questTimerOverlay.open,
+          #questTimerOverlay .quest-timer-card,
+          #questTimerOverlay .quest-capsule-area,
+          #questTimerOverlay .quest-capsule-area *,
+          #questClaim,
+          .quest-claim,
+          .quest-claim.ready,
+          .timer-window,
+          .timer-window *,
+          .timer-overlay,
+          .timer-overlay *,
+          .capsule-slot,
+          .capsule-clock,
+          .capsule-clock *,
+          .gym-capsule-bottom .capsule-slot,
+          .side-capsule-bottom .capsule-slot {
+            pointer-events: auto !important;
+            touch-action: manipulation !important;
+          }
 
-            .capsule-slot input[type="checkbox"],
-            .capsule-clock input[type="checkbox"],
-            .timer-box input[type="checkbox"],
-            .timerBox input[type="checkbox"],
-            .timer-overlay input[type="checkbox"],
-            .quest-timer input[type="checkbox"],
-            input.check[type="checkbox"] {
-              pointer-events:auto!important;
-              position:relative!important;
-              z-index:2147483647!important;
-              touch-action:manipulation!important;
-            }
-          `;
-          document.head.appendChild(css);
-        }
+          #questTimerOverlay {
+            z-index: 2147483640 !important;
+          }
 
-        const killHud = () => {
-          document.querySelectorAll(
-            "#beyond-static-hud-v1,.static-hud-layer,.static-hud-top,.static-hud-bottom,.top-cut,.bottom-cut,.hud-top,.hud-bottom,.hud-top-layer,.hud-bottom-layer,.custom-hud-top-ornament,.custom-hud-bottom-ornament,.statusHudTopV37,.statusHudBottomV37,.statusHudTopSoftV37,.statusHudBottomSoftV37,.statusHudRailV77,.systemHudTopV77,.systemHudBottomV77,#beyond-system-frame-v78,#beyond-asset-gate-v80,#beyond-asset-gate-v93,#beyond-asset-gate-v94,#beyond-asset-gate-v95,#beyond-asset-gate-v96"
-          ).forEach((el) => el.remove());
-        };
-        killHud();
-        window.setTimeout(killHud, 350);
-        window.setTimeout(killHud, 1000);
-        window.setTimeout(killHud, 2200);
+          #questTimerOverlay .quest-timer-card {
+            position: relative !important;
+            z-index: 2147483641 !important;
+            overflow: visible !important;
+          }
 
-        const scriptId = "beyond-final-notification-once-patch";
-        if (!document.getElementById(scriptId)) {
-          const script = document.createElement("script");
-          script.id = scriptId;
-          script.textContent = `
-(function(){
-  if(window.__beyondFinalNotificationOncePatch)return;
-  window.__beyondFinalNotificationOncePatch=true;
-  var locks = window.__beyondFinalMinuteLocks || (window.__beyondFinalMinuteLocks = {});
-  function st(){try{return window.state||state||null}catch(e){return window.state||null}}
-  function key(id){
-    try{
-      var s=st();
-      var t=s&&s.questTimers&&s.questTimers[id];
-      return String(id||'')+':'+String(t&&t.start||'nostart');
-    }catch(e){return String(id||'')}
-  }
-  function isDone(id){try{var s=st();return !!(s&&s.checks&&s.checks[id])}catch(e){return false}}
-  function markTimer(id){
-    try{
-      var s=st();
-      if(s&&s.questTimers&&s.questTimers[id]){
-        s.questTimers[id].finalMinuteNotified=true;
-        try{if(typeof save==='function')save()}catch(e){}
-      }
-    }catch(e){}
-  }
-  function already(id){
-    var k=key(id);
-    if(locks[k])return true;
-    try{var s=st();var t=s&&s.questTimers&&s.questTimers[id];if(t&&t.finalMinuteNotified){locks[k]=1;return true}}catch(e){}
-    return false;
-  }
-  function lock(id){locks[key(id)]=Date.now();markTimer(id)}
+          #questTimerOverlay .quest-capsule-area {
+            position: relative !important;
+            z-index: 2147483642 !important;
+            overflow: visible !important;
+          }
 
-  function patchSendQuestNotification(){
-    try{
-      var original=window.sendQuestNotification || (typeof sendQuestNotification==='function'?sendQuestNotification:null);
-      if(!original || original.__beyondFinalOnce)return false;
-      var wrapped=function(kind,body){
-        if(String(kind||'')==='finalMinute'){
-          var id='';
-          try{id=String(window.__beyondActiveTimerId||'')}catch(e){}
-          var k='send:'+String(body||'');
-          if(locks[k] && Date.now()-locks[k] < 65000)return null;
-          locks[k]=Date.now();
-        }
-        return original.apply(this,arguments);
-      };
-      wrapped.__beyondFinalOnce=true;
-      window.sendQuestNotification=wrapped;
-      try{sendQuestNotification=wrapped}catch(e){}
-      return true;
-    }catch(e){return false}
-  }
+          #questClaim,
+          .quest-claim,
+          .quest-claim.ready {
+            position: absolute !important;
+            z-index: 2147483647 !important;
+            pointer-events: auto !important;
+            cursor: pointer !important;
+            touch-action: manipulation !important;
+            -webkit-tap-highlight-color: transparent !important;
+          }
 
-  function patchNotificationConstructor(){
-    try{
-      if(!('Notification' in window) || window.Notification.__beyondFinalOnce)return;
-      var Original=window.Notification;
-      function WrappedNotification(title,opts){
-        var text=String(title||'')+' '+String((opts&&opts.body)||'');
-        if(/zadnja minuta|last minute|DON'T DISAPPEAR/i.test(text)){
-          var k='raw:'+text;
-          if(locks[k] && Date.now()-locks[k] < 65000)return {close:function(){}};
-          locks[k]=Date.now();
-        }
-        return new Original(title,opts);
-      }
-      Object.setPrototypeOf(WrappedNotification, Original);
-      WrappedNotification.prototype=Original.prototype;
-      Object.defineProperty(WrappedNotification,'permission',{get:function(){return Original.permission}});
-      WrappedNotification.requestPermission=function(){return Original.requestPermission.apply(Original,arguments)};
-      WrappedNotification.__beyondFinalOnce=true;
-      window.Notification=WrappedNotification;
-    }catch(e){}
-  }
+          #questClaim::before,
+          #questClaim::after,
+          .quest-claim::before,
+          .quest-claim::after {
+            pointer-events: none !important;
+          }
 
-  function makeTimerCheckboxClickable(){
-    try{
-      document.querySelectorAll('input.check[type="checkbox"],input[type="checkbox"].check,input[type="checkbox"]').forEach(function(el){
-        el.style.pointerEvents='auto';
-        el.style.position='relative';
-        el.style.zIndex='2147483647';
-        el.style.touchAction='manipulation';
-      });
-    }catch(e){}
-  }
+          .quest-timer-actions,
+          .quest-timer-actions *,
+          .notify-btn,
+          .check,
+          input[type="checkbox"],
+          button {
+            pointer-events: auto !important;
+            touch-action: manipulation !important;
+          }
+        `;
+        document.head.appendChild(css);
 
-  function run(){patchSendQuestNotification();patchNotificationConstructor();makeTimerCheckboxClickable()}
-  run();
-  document.addEventListener('click',function(){setTimeout(run,30)},true);
-  document.addEventListener('touchstart',function(){setTimeout(run,30)},true);
-  window.addEventListener('focus',function(){setTimeout(run,60)});
-  document.addEventListener('visibilitychange',function(){if(!document.hidden)setTimeout(run,60)});
-  var i=setInterval(run,500);
-  setTimeout(function(){try{clearInterval(i)}catch(e){}},12000);
-})();
-          `;
-          document.body.appendChild(script);
+        if (!(window as any).__beyondGlobalTimerClickFixInstalled) {
+          (window as any).__beyondGlobalTimerClickFixInstalled = true;
+
+          const forceClaim = (event: Event) => {
+            try {
+              const target = event.target as HTMLElement | null;
+              const claim = target?.closest?.("#questClaim, .quest-claim") as HTMLElement | null;
+              if (!claim) return;
+              if (!claim.classList.contains("ready")) return;
+
+              event.preventDefault();
+              event.stopPropagation();
+              if (typeof (event as any).stopImmediatePropagation === "function") {
+                (event as any).stopImmediatePropagation();
+              }
+
+              const id = (window as any).__activeQuestTimerId;
+              if (!id || typeof (window as any).claimQuestTimer !== "function") return;
+
+              claim.classList.add("claimed");
+              const card = document.querySelector("#questTimerOverlay .quest-timer-card");
+              if (card) {
+                card.classList.remove("claim-success");
+                void (card as HTMLElement).offsetWidth;
+                card.classList.add("claim-success");
+              }
+
+              window.setTimeout(() => {
+                try { (window as any).claimQuestTimer(id); } catch {}
+              }, 120);
+            } catch {}
+          };
+
+          document.addEventListener("click", forceClaim, true);
+          document.addEventListener("touchend", forceClaim, true);
         }
       } catch {}
     };
 
-    installNotificationAndHudCleanup();
-    window.setTimeout(installNotificationAndHudCleanup, 300);
-    window.setTimeout(installNotificationAndHudCleanup, 900);
+    installGlobalTimerClickFix();
+    window.setTimeout(installGlobalTimerClickFix, 300);
+    window.setTimeout(installGlobalTimerClickFix, 900);
+    window.setTimeout(installGlobalTimerClickFix, 1800);
   }, []);
 
   return null;
