@@ -1389,172 +1389,155 @@ export default function AppShell() {
     }, 500);
 
 
-    // STATIC PNG HUD LAYERS: no entrance/page-change animations. Keeps notification/message animations untouched.
-    const installStaticHudLayers = () => {
-      try {
-        let css = document.getElementById("beyond-static-hud-v1-css");
-        if (!css) {
-          css = document.createElement("style");
-          css.id = "beyond-static-hud-v1-css";
-          document.head.appendChild(css);
-        }
-
-        css.textContent = `
-          /* Remove all old code-made HUD frames/layers and every old gate animation layer */
-          html body .outer-top,
-          html body .outer-bottom,
-          html body .top-cut,
-          html body .bottom-cut,
-          html body .hud-top,
-          html body .hud-bottom,
-          html body .hud-top-layer,
-          html body .hud-bottom-layer,
-          html body .custom-hud-top-ornament,
-          html body .custom-hud-bottom-ornament,
-          html body .statusHudTopV37,
-          html body .statusHudBottomV37,
-          html body .statusHudTopSoftV37,
-          html body .statusHudBottomSoftV37,
-          html body .statusHudRailV77,
-          html body .systemHudTopV77,
-          html body .systemHudBottomV77,
-          html body #beyond-system-frame-v78,
-          html body #beyond-asset-gate-v80,
-          html body #beyond-asset-gate-v93,
-          html body #beyond-asset-gate-v94,
-          html body #beyond-asset-gate-v95,
-          html body #beyond-asset-gate-v96,
-          html body #beyond-system-frame-v78 *{
-            display:none!important;
-            opacity:0!important;
-            visibility:hidden!important;
-            pointer-events:none!important;
-            width:0!important;
-            height:0!important;
-            min-width:0!important;
-            min-height:0!important;
-            border:0!important;
-            outline:0!important;
-            box-shadow:none!important;
-            filter:none!important;
-            background:none!important;
-            transform:none!important;
-            animation:none!important;
-            clip-path:none!important;
+    // FINAL HUD CLEANUP: remove old PNG HUD/layer leftovers and broken-image ? markers.
+    useEffect(() => {
+      const cleanupHudLayerRemnants = () => {
+        try {
+          let css = document.getElementById("beyond-final-hud-cleanup-css");
+          if (!css) {
+            css = document.createElement("style");
+            css.id = "beyond-final-hud-cleanup-css";
+            document.head.appendChild(css);
           }
 
-          html body.beyond-gate-opening,
-          html body.beyond-gate-hide-content,
-          html body.beyond-gate-screen-opening{
-            background:inherit!important;
-          }
+          css.textContent = `
+            /* Hide/remove every old HUD/layer system and broken image marker */
+            #beyond-static-hud-v1,
+            #beyond-static-hud-v1 *,
+            .static-hud-layer,
+            .static-hud-top,
+            .static-hud-bottom,
+            .outer-top,
+            .outer-bottom,
+            .top-cut,
+            .bottom-cut,
+            .hud-top,
+            .hud-bottom,
+            .hud-top-layer,
+            .hud-bottom-layer,
+            .custom-hud-top-ornament,
+            .custom-hud-bottom-ornament,
+            .statusHudTopV37,
+            .statusHudBottomV37,
+            .statusHudTopSoftV37,
+            .statusHudBottomSoftV37,
+            .statusHudRailV77,
+            .systemHudTopV77,
+            .systemHudBottomV77,
+            #beyond-system-frame-v78,
+            #beyond-system-frame-v78 *,
+            #beyond-asset-gate-v80,
+            #beyond-asset-gate-v93,
+            #beyond-asset-gate-v94,
+            #beyond-asset-gate-v95,
+            #beyond-asset-gate-v96,
+            img[src="/hud/top-layer.png"],
+            img[src="/hud/bottom-layer.png"],
+            img[src*="top-layer.png"],
+            img[src*="bottom-layer.png"],
+            img[src*="/hud/"]{
+              display:none!important;
+              opacity:0!important;
+              visibility:hidden!important;
+              pointer-events:none!important;
+              width:0!important;
+              height:0!important;
+              min-width:0!important;
+              min-height:0!important;
+              max-width:0!important;
+              max-height:0!important;
+              border:0!important;
+              outline:0!important;
+              box-shadow:none!important;
+              filter:none!important;
+              background:none!important;
+              transform:none!important;
+              animation:none!important;
+              clip-path:none!important;
+            }
 
-          html body.beyond-gate-opening .app,
-          html body.beyond-gate-opening .page.active,
-          html body.beyond-gate-opening .page.active .screen,
-          html body.beyond-gate-opening .page.active .status-screen,
-          html body.beyond-gate-opening .page.active .hygiene-screen,
-          html body:not(.beyond-gate-opening) .page.active .screen,
-          html body:not(.beyond-gate-opening) .page.active .status-screen,
-          html body:not(.beyond-gate-opening) .page.active .hygiene-screen{
-            opacity:1!important;
-            visibility:visible!important;
-            clip-path:none!important;
-            animation:none!important;
-            transform:none!important;
-            filter:none!important;
-          }
+            html body.beyond-gate-opening,
+            html body.beyond-gate-hide-content,
+            html body.beyond-gate-screen-opening{
+              background:inherit!important;
+            }
 
-          #beyond-static-hud-v1{
-            position:fixed!important;
-            inset:0!important;
-            left:50%!important;
-            width:min(100vw,430px)!important;
-            height:100dvh!important;
-            min-height:100svh!important;
-            transform:translateX(-50%)!important;
-            z-index:1200!important;
-            pointer-events:none!important;
-            overflow:hidden!important;
-            background:transparent!important;
-          }
+            html body.beyond-gate-opening .app,
+            html body.beyond-gate-opening .page.active,
+            html body.beyond-gate-opening .page.active .screen,
+            html body.beyond-gate-opening .page.active .status-screen,
+            html body.beyond-gate-opening .page.active .hygiene-screen,
+            html body:not(.beyond-gate-opening) .page.active .screen,
+            html body:not(.beyond-gate-opening) .page.active .status-screen,
+            html body:not(.beyond-gate-opening) .page.active .hygiene-screen{
+              opacity:1!important;
+              visibility:visible!important;
+              clip-path:none!important;
+              animation:none!important;
+              transform:none!important;
+              filter:none!important;
+            }
 
-          #beyond-static-hud-v1 .static-hud-layer{
-            position:absolute!important;
-            left:50%!important;
-            width:138%!important;
-            max-width:none!important;
-            height:auto!important;
-            object-fit:contain!important;
-            opacity:.98!important;
-            user-select:none!important;
-            -webkit-user-drag:none!important;
-            pointer-events:none!important;
-            transform:translateX(-50%)!important;
-            animation:none!important;
-            transition:none!important;
-            filter:drop-shadow(0 0 6px rgba(0,190,255,.55)) drop-shadow(0 0 14px rgba(0,80,255,.22))!important;
-          }
+            /* Keep hamburger clickable and visible */
+            .hamburger-panel,
+            .hamburger-btn,
+            .hamburger-menu,
+            .menu{
+              z-index:99999!important;
+            }
+          `;
 
-          #beyond-static-hud-v1 .static-hud-top{
-            top:max(-34px,calc(env(safe-area-inset-top) - 34px))!important;
-          }
+          const selectors = [
+            "#beyond-static-hud-v1",
+            ".static-hud-layer",
+            ".static-hud-top",
+            ".static-hud-bottom",
+            ".outer-top",
+            ".outer-bottom",
+            ".top-cut",
+            ".bottom-cut",
+            ".hud-top",
+            ".hud-bottom",
+            ".hud-top-layer",
+            ".hud-bottom-layer",
+            ".custom-hud-top-ornament",
+            ".custom-hud-bottom-ornament",
+            ".statusHudTopV37",
+            ".statusHudBottomV37",
+            ".statusHudTopSoftV37",
+            ".statusHudBottomSoftV37",
+            ".statusHudRailV77",
+            ".systemHudTopV77",
+            ".systemHudBottomV77",
+            "#beyond-system-frame-v78",
+            "#beyond-asset-gate-v80",
+            "#beyond-asset-gate-v93",
+            "#beyond-asset-gate-v94",
+            "#beyond-asset-gate-v95",
+            "#beyond-asset-gate-v96",
+            'img[src="/hud/top-layer.png"]',
+            'img[src="/hud/bottom-layer.png"]',
+            'img[src*="top-layer.png"]',
+            'img[src*="bottom-layer.png"]',
+            'img[src*="/hud/"]',
+          ];
 
-          #beyond-static-hud-v1 .static-hud-bottom{
-            bottom:max(-34px,calc(env(safe-area-inset-bottom) - 34px))!important;
-          }
+          document.querySelectorAll(selectors.join(",")).forEach((el) => el.remove());
+          document.body.classList.remove("beyond-gate-opening");
+          document.body.classList.remove("beyond-gate-hide-content");
+          document.body.classList.remove("beyond-gate-screen-opening");
+          (window as any).__beyondPlayAssetGate = () => false;
+        } catch {}
+      };
 
-          body:not(.player-entered) #beyond-static-hud-v1{
-            display:none!important;
-          }
-
-          body.player-entered .status-screen,
-          body.player-entered .screen,
-          body.player-entered .hygiene-screen{
-            padding-top:max(64px,calc(env(safe-area-inset-top) + 54px))!important;
-            padding-bottom:max(66px,calc(env(safe-area-inset-bottom) + 56px))!important;
-          }
-
-          /* Hamburger always stays above static HUD layers */
-          .hamburger-panel,
-          .hamburger-btn,
-          .hamburger-menu,
-          .menu{
-            z-index:99999!important;
-          }
-        `;
-
-        const killOld = () => {
-          document.querySelectorAll(
-            ".outer-top,.outer-bottom,.top-cut,.bottom-cut,.hud-top,.hud-bottom,.hud-top-layer,.hud-bottom-layer,.custom-hud-top-ornament,.custom-hud-bottom-ornament,.statusHudTopV37,.statusHudBottomV37,.statusHudTopSoftV37,.statusHudBottomSoftV37,.statusHudRailV77,.systemHudTopV77,.systemHudBottomV77,#beyond-system-frame-v78,#beyond-asset-gate-v80,#beyond-asset-gate-v93,#beyond-asset-gate-v94,#beyond-asset-gate-v95,#beyond-asset-gate-v96"
-          ).forEach((el) => el.remove());
-        };
-
-        killOld();
-
-        let layer = document.getElementById("beyond-static-hud-v1");
-        if (!layer) {
-          layer = document.createElement("div");
-          layer.id = "beyond-static-hud-v1";
-          document.body.appendChild(layer);
-        }
-
-        layer.innerHTML = `
-          <img class="static-hud-layer static-hud-top" src="/hud/top-layer.png" alt="" />
-          <img class="static-hud-layer static-hud-bottom" src="/hud/bottom-layer.png" alt="" />
-        `;
-
-        document.body.classList.remove("beyond-gate-opening");
-        document.body.classList.remove("beyond-gate-hide-content");
-        document.body.classList.remove("beyond-gate-screen-opening");
-        (window as any).__beyondPlayAssetGate = () => false;
-      } catch {}
-    };
-
-    installStaticHudLayers();
-    window.setTimeout(installStaticHudLayers, 300);
-    window.setTimeout(installStaticHudLayers, 900);
-  }, []);
+      cleanupHudLayerRemnants();
+      window.setTimeout(cleanupHudLayerRemnants, 50);
+      window.setTimeout(cleanupHudLayerRemnants, 300);
+      window.setTimeout(cleanupHudLayerRemnants, 900);
+      window.setTimeout(cleanupHudLayerRemnants, 1800);
+      const cleanupTimer = window.setInterval(cleanupHudLayerRemnants, 1200);
+      window.setTimeout(() => window.clearInterval(cleanupTimer), 12000);
+    }, []);
 
 
   useEffect(() => {
