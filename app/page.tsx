@@ -1387,9 +1387,9 @@ export default function Page() {
       } catch {}
     };
 
-    installStaticHudLayers();
-    window.setTimeout(installStaticHudLayers, 300);
-    window.setTimeout(installStaticHudLayers, 900);
+    
+    
+    
   }, []);
 
 
