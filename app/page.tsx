@@ -562,7 +562,7 @@ export default function Page() {
 
   window.__beyondSaveLeaderboardName=async function(name){try{var ss=await session();var user=ss&&ss.user;if(!user)return {error:'No logged in user found.'};var st=s()||{};var nm=cleanName(name||user.email);st.username=nm;st.playerName=nm;st.leaderboardName=nm;localStorage.questPlayerUsername=nm.toUpperCase();localStorage.playerName=nm;localStorage.leaderboardName=nm;await window.__beyondSyncProgress();return {ok:true,name:nm}}catch(e){return {error:e&&e.message?e.message:String(e)}}};
 
-  async function autoEnterIfProfileExists(){try{var ss=await session();var user=ss&&ss.user;if(!user)return false;var p=await profileFor(user);var nm=cleanName((p&&(p.username||p.player_name||p.display_name))||'');if(p&&nm&&nm!=='PLAYER'){await window.__beyondLoadProgress();localStorage.questPlayerAccepted='1';localStorage.playerEntered='true';localStorage.questGoogleIntroAccepted='1';document.body.classList.add('player-entered');var shell=document.getElementById('introShell');if(shell)shell.style.display='none';try{render();applyPathMenu()}catch(e){}return true}return false}catch(e){return false}}
+  async function autoEnterIfProfileExists(){return false;/* disabled */}/*var user=ss&&ss.user;if(!user)return false;var p=await profileFor(user);var nm=cleanName((p&&(p.username||p.player_name||p.display_name))||'');if(p&&nm&&nm!=='PLAYER'){await window.__beyondLoadProgress();localStorage.questPlayerAccepted='1';localStorage.playerEntered='true';localStorage.questGoogleIntroAccepted='1';document.body.classList.add('player-entered');var shell=document.getElementById('introShell');if(shell)shell.style.display='none';try{render();applyPathMenu()}catch(e){}return true}return false}catch(e){return false}}
   function patchUsernameOnce(){try{if(window.acceptPlayer&&!window.acceptPlayer.__v12UsernameOnce){var oldAccept=window.acceptPlayer;window.acceptPlayer=async function(){if(await autoEnterIfProfileExists())return;return oldAccept.apply(this,arguments)};window.acceptPlayer.__v12UsernameOnce=true}if(window.enterApp&&!window.enterApp.__v12UsernameOnce){var oldEnter=window.enterApp;window.enterApp=async function(){var input=document.getElementById('playerUsername');var nm=cleanName(input&&input.value?input.value:'PLAYER');var res=await window.__beyondSaveLeaderboardName(nm);if(res&&res.error){alert('PROFILE SAVE ERROR: '+res.error);return}return oldEnter.apply(this,arguments)};window.enterApp.__v12UsernameOnce=true}}catch(e){}}
 
   function showReward(el,xp,stat){try{xp=Number(xp)||0;if(!el||xp<=0)return;var r=el.getBoundingClientRect();var b=document.createElement('div');b.className='beyond-v12-reward-float';b.style.left=(r.left+r.width/2)+'px';b.style.top=(r.top-12)+'px';b.innerHTML='+'+xp+' XP'+(stat?'<span class="stat">+'+stat+'</span>':'');document.body.appendChild(b);setTimeout(function(){try{b.remove()}catch(e){}},1000)}catch(e){}}
@@ -1387,9 +1387,9 @@ export default function Page() {
       } catch {}
     };
 
-    
-    
-    
+    installStaticHudLayers();
+    window.setTimeout(installStaticHudLayers, 300);
+    window.setTimeout(installStaticHudLayers, 900);
   }, []);
 
 
