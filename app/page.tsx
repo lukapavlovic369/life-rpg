@@ -1792,5 +1792,62 @@ export default function Page() {
     document.head.appendChild(css);
   }, []);
 
+
+  useEffect(() => {
+    // Move the complete Status stack together; preserve every internal gap.
+    const css = document.createElement("style");
+    css.id = "beyond-status-align-hamburger";
+    css.textContent = `
+      html body #status .status-content {
+        translate:0 var(--status-stack-shift,0px)!important;
+      }
+    `;
+    document.head.appendChild(css);
+    let frame = 0;
+    const alignStatus = () => {
+      const page = document.getElementById("status");
+      const content = page?.querySelector(".status-content") as HTMLElement | null;
+      const heading = page?.querySelector(".statusHead");
+      const hamburger = document.querySelector(".hamburger-btn");
+      if (!page?.classList.contains("active") || !content || !heading || !hamburger) return;
+      const titleRect = heading.getBoundingClientRect();
+      const buttonRect = hamburger.getBoundingClientRect();
+      if (!titleRect.height || !buttonRect.height) return;
+      const currentShift = parseFloat(content.style.getPropertyValue("--status-stack-shift")) || 0;
+      const baseCenter = titleRect.top + titleRect.height / 2 - currentShift;
+      const targetCenter = buttonRect.top + buttonRect.height / 2;
+      const nextShift = Math.round((targetCenter - baseCenter) * 100) / 100;
+      if (Math.abs(nextShift - currentShift) > .25) {
+        content.style.setProperty("--status-stack-shift", nextShift + "px");
+      }
+    };
+    const schedule = () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(alignStatus);
+    };
+    schedule();
+    const delays = [300,900,1800].map((delay) => window.setTimeout(schedule,delay));
+    window.addEventListener("resize", schedule);
+    document.fonts?.ready.then(schedule);
+    const page = document.getElementById("status");
+    const observer = new MutationObserver(() => {
+      schedule();
+      window.clearTimeout(returnTimer);
+      returnTimer = window.setTimeout(schedule,1800);
+    });
+    let returnTimer = 0;
+    if (page) observer.observe(page,{attributes:true,attributeFilter:["class"]});
+    const sizes = new ResizeObserver(schedule);
+    const heading = page?.querySelector(".statusHead");
+    const hamburger = document.querySelector(".hamburger-btn");
+    if (heading) sizes.observe(heading);
+    if (hamburger) sizes.observe(hamburger);
+    return () => {
+      observer.disconnect(); sizes.disconnect(); cancelAnimationFrame(frame);
+      delays.forEach((id) => window.clearTimeout(id)); window.clearTimeout(returnTimer);
+      window.removeEventListener("resize",schedule); css.remove();
+    };
+  }, []);
+
   return null;
 }
