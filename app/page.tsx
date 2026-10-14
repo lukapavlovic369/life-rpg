@@ -1715,5 +1715,66 @@ export default function Page() {
 
   }, []);
 
+
+  useEffect(() => {
+    // Handle menu taps before legacy document listeners and Safari hover clicks.
+    const w = window as any;
+    if (w.__beyondMenuTapInstalled) return;
+    w.__beyondMenuTapInstalled = true;
+    let pressed: { button: HTMLButtonElement; x: number; y: number; id: number } | null = null;
+    let lastButton: HTMLButtonElement | null = null;
+    let lastTap = 0;
+    const menuButton = (target: EventTarget | null) => {
+      if (!(target instanceof Element)) return null;
+      const button = target.closest("#hamburgerMenu button") as HTMLButtonElement | null;
+      return button?.getAttribute("onclick")?.match(/showPage\(['"]([a-zA-Z0-9_-]+)['"]\)/) ? button : null;
+    };
+    const navigate = (button: HTMLButtonElement, event: Event) => {
+      const match = button.getAttribute("onclick")?.match(/showPage\(['"]([a-zA-Z0-9_-]+)['"]\)/);
+      if (!match || button.disabled || typeof w.showPage !== "function") return;
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      lastButton = button;
+      lastTap = Date.now();
+      w.showPage(match[1]);
+    };
+    window.addEventListener("pointerdown", (event: PointerEvent) => {
+      const button = menuButton(event.target);
+      pressed = button && event.isPrimary && event.button === 0
+        ? { button, x: event.clientX, y: event.clientY, id: event.pointerId } : null;
+    }, true);
+    window.addEventListener("pointercancel", () => { pressed = null; }, true);
+    window.addEventListener("pointermove", (event: PointerEvent) => {
+      if (pressed && pressed.id === event.pointerId &&
+          Math.hypot(event.clientX - pressed.x, event.clientY - pressed.y) > 12) pressed = null;
+    }, true);
+    window.addEventListener("pointerup", (event: PointerEvent) => {
+      const start = pressed;
+      pressed = null;
+      if (!start || start.id !== event.pointerId || menuButton(event.target) !== start.button) return;
+      if (Math.hypot(event.clientX - start.x, event.clientY - start.y) > 12) return;
+      navigate(start.button, event);
+    }, true);
+    window.addEventListener("click", (event: MouseEvent) => {
+      const button = menuButton(event.target);
+      if (!button) return;
+      if (event.detail !== 0 && button === lastButton && Date.now() - lastTap < 700) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        return;
+      }
+      navigate(button, event); // Keyboard activation and browsers without Pointer Events.
+    }, true);
+    const css = document.createElement("style");
+    css.id = "beyond-menu-single-tap";
+    css.textContent = `
+      html body #hamburgerMenu button { touch-action:manipulation!important; }
+      @media (hover:none) {
+        html body #hamburgerMenu button:hover { transform:none!important; }
+      }
+    `;
+    document.head.appendChild(css);
+  }, []);
+
   return null;
 }
