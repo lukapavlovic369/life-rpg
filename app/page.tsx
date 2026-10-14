@@ -1686,6 +1686,32 @@ export default function Page() {
       document.head.appendChild(css);
     };
     installMobileSurfaceFix();
+    // iOS standalone can report a shorter dynamic viewport than the screen.
+    // Keep the Status surface at least as tall as both viewport measurements.
+    const statusBottomCss = document.createElement("style");
+    statusBottomCss.id = "beyond-status-bottom-surface";
+    statusBottomCss.textContent = `
+      @media (max-width:700px) {
+        html:has(#status.page.active),
+        html body:has(#status.page.active) {
+          min-height:100vh!important;
+          min-height:max(100vh,100dvh)!important;
+          background-color:#00040a!important;
+          background-image:linear-gradient(180deg,rgba(0,0,0,.10),rgba(0,0,0,.22)),url('/backgrounds/status-bg.png')!important;
+          background-size:cover!important;
+          background-position:center top!important;
+          background-repeat:no-repeat!important;
+        }
+        html body #status.page.active,
+        html body #status.page.active main.status-screen {
+          min-height:100vh!important;
+          min-height:max(100vh,100dvh)!important;
+          box-sizing:border-box!important;
+        }
+      }
+    `;
+    document.head.appendChild(statusBottomCss);
+
 
   }, []);
 
