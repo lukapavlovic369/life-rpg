@@ -39,3 +39,12 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Native build outputs
+/.native-build/
+/native-web/
+/ios/App/App/public/
+/ios/App/build/
+/ios/App/DerivedData/
+*.xcuserstate
+**/xcuserdata/
