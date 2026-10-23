@@ -282,26 +282,40 @@ export default function Page() {
       };
 
       (window as any).__beyondFetchProfiles = async function () {
-        const { data: sessionData } = await supabase.auth.getSession();
-        const uid = sessionData.session?.user?.id || "";
-        (window as any).__beyondCurrentUserId = uid;
-
-        const { data, error } = await supabase
-          .from("profiles")
-          .select("id,email,role,is_premium,level,xp")
-          .order("level", { ascending: false })
-          .order("xp", { ascending: false });
-
-        if (error || !data) return [];
-        return data.map((p: any) => ({
-          id: p.id,
-          email: p.email,
-          name: p.email ? String(p.email).split("@")[0] : "PLAYER",
-          level: p.level || 1,
-          xp: p.xp || 0,
-          role: p.role || "player",
-          is_premium: !!p.is_premium
-        }));
+        const w = window as any;
+        const owner = w.__blAuthUserId;
+        if (!w.__blAuthReady || !owner || w.__blAuthHydrating) return [];
+        if (w.__blLeaderboardOwner !== owner) {
+          w.__blLeaderboardOwner = owner;
+          w.__blLeaderboardCache = [];
+          w.__blLeaderboardNextFetch = 0;
+          w.__beyondLeaderboardPlayers = [];
+        }
+        if (document.hidden || !document.getElementById("leaderboard")?.classList.contains("active")) return w.__blLeaderboardCache;
+        if (Date.now() < (w.__blLeaderboardNextFetch || 0)) return w.__blLeaderboardCache;
+        if (w.__blLeaderboardPending?.owner === owner) return w.__blLeaderboardPending.promise;
+        const pending: any = { owner };
+        pending.promise = (async () => {
+          w.__blLeaderboardNextFetch = Date.now() + 60000;
+          try {
+            const { data, error } = await supabase.from("profiles")
+              .select("id,username,player_name,display_name,level,xp,role")
+              .order("level", { ascending: false }).order("xp", { ascending: false }).limit(100);
+            if (!w.__blAuthReady || w.__blAuthUserId !== owner) return [];
+            if (error || !data) return w.__blLeaderboardCache;
+            w.__beyondCurrentUserId = owner;
+            const players = data.map((p: any) => ({
+              id: p.id, username: p.username || p.player_name || p.display_name || "PLAYER",
+              name: p.username || p.player_name || p.display_name || "PLAYER",
+              level: p.level || 1, xp: p.xp || 0, role: p.role || "player"
+            }));
+            w.__blLeaderboardCache = players;
+            return players;
+          } catch { return w.__blAuthUserId === owner ? w.__blLeaderboardCache : []; }
+          finally { if (w.__blLeaderboardPending === pending) w.__blLeaderboardPending = null; }
+        })();
+        w.__blLeaderboardPending = pending;
+        return pending.promise;
       };
     } catch {}
 
@@ -523,25 +537,40 @@ export default function Page() {
       };
 
       (window as any).__beyondFetchProfiles = async function () {
-        const { data: sessionData } = await supabase.auth.getSession();
-        const uid = sessionData.session?.user?.id || "";
-        (window as any).__beyondCurrentUserId = uid;
-        const { data, error } = await supabase
-          .from("profiles")
-          .select("*")
-          .order("level", { ascending: false })
-          .order("xp", { ascending: false });
-        if (error || !data) return [];
-        return data.map((p: any) => ({
-          id: p.id,
-          email: p.email,
-          username: p.username || p.player_name || p.display_name || (p.email ? String(p.email).split("@")[0] : "PLAYER"),
-          name: p.username || p.player_name || p.display_name || (p.email ? String(p.email).split("@")[0] : "PLAYER"),
-          level: p.level || 1,
-          xp: p.xp || 0,
-          role: p.role || "player",
-          is_premium: !!p.is_premium
-        }));
+        const w = window as any;
+        const owner = w.__blAuthUserId;
+        if (!w.__blAuthReady || !owner || w.__blAuthHydrating) return [];
+        if (w.__blLeaderboardOwner !== owner) {
+          w.__blLeaderboardOwner = owner;
+          w.__blLeaderboardCache = [];
+          w.__blLeaderboardNextFetch = 0;
+          w.__beyondLeaderboardPlayers = [];
+        }
+        if (document.hidden || !document.getElementById("leaderboard")?.classList.contains("active")) return w.__blLeaderboardCache;
+        if (Date.now() < (w.__blLeaderboardNextFetch || 0)) return w.__blLeaderboardCache;
+        if (w.__blLeaderboardPending?.owner === owner) return w.__blLeaderboardPending.promise;
+        const pending: any = { owner };
+        pending.promise = (async () => {
+          w.__blLeaderboardNextFetch = Date.now() + 60000;
+          try {
+            const { data, error } = await supabase.from("profiles")
+              .select("id,username,player_name,display_name,level,xp,role")
+              .order("level", { ascending: false }).order("xp", { ascending: false }).limit(100);
+            if (!w.__blAuthReady || w.__blAuthUserId !== owner) return [];
+            if (error || !data) return w.__blLeaderboardCache;
+            w.__beyondCurrentUserId = owner;
+            const players = data.map((p: any) => ({
+              id: p.id, username: p.username || p.player_name || p.display_name || "PLAYER",
+              name: p.username || p.player_name || p.display_name || "PLAYER",
+              level: p.level || 1, xp: p.xp || 0, role: p.role || "player"
+            }));
+            w.__blLeaderboardCache = players;
+            return players;
+          } catch { return w.__blAuthUserId === owner ? w.__blLeaderboardCache : []; }
+          finally { if (w.__blLeaderboardPending === pending) w.__blLeaderboardPending = null; }
+        })();
+        w.__blLeaderboardPending = pending;
+        return pending.promise;
       };
     } catch {}
 
@@ -637,8 +666,8 @@ export default function Page() {
   async function session(){try{if(window.__beyondGetAuthSession)return await window.__beyondGetAuthSession();var c=window.__beyondSupabase||window.supabaseClient;if(!c)return null;var r=await c.auth.getSession();return r&&r.data&&r.data.session}catch(e){return null}}
   async function profileFor(user){try{var c=window.__beyondSupabase||window.supabaseClient;if(!c||!user)return null;var r=await c.from('profiles').select('*').eq('id',user.id).maybeSingle();return r&&r.data?r.data:null}catch(e){return null}}
 
-  var progressWrites=Promise.resolve();window.__beyondSyncProgress=function(){var run=function(){return syncProgressNow()};progressWrites=progressWrites.then(run,run);return progressWrites};async function syncProgressNow(){if(!window.__blAuthReady||window.__blAuthHydrating)return null;try{var c=window.__beyondSupabase||window.supabaseClient;if(!c)return null;var ss=await session();var user=ss&&ss.user;if(!user)return null;if(user.id!==window.__blAuthUserId||user.id!==localStorage.beyondProfileOwner)return null;var old=await profileFor(user);if(!window.__blAuthReady||window.__blAuthHydrating||user.id!==window.__blAuthUserId||user.id!==localStorage.beyondProfileOwner)return null;var p=JSON.parse(JSON.stringify(payload(user,old)));var r=await c.from('profiles').upsert(p,{onConflict:'id'});if(r.error){console.warn('Beyond progress sync failed:',r.error.message||r.error);return {error:r.error.message||String(r.error)}}return {ok:true}}catch(e){console.warn('Beyond progress sync failed:',e);return {error:e&&e.message?e.message:String(e)}}};
-  window.__beyondRequestProgressSync=function(){clearTimeout(syncTimer);syncTimer=setTimeout(function(){try{window.__beyondSyncProgress()}catch(e){}},220)};
+  var lastSyncedState='',lastSyncedOwner='',syncRetryAfter=0;var progressWrites=Promise.resolve();window.__beyondSyncProgress=function(){var run=function(){return syncProgressNow()};progressWrites=progressWrites.then(run,run);return progressWrites};async function syncProgressNow(){if(!window.__blAuthReady||window.__blAuthHydrating)return null;try{var c=window.__beyondSupabase||window.supabaseClient;if(!c)return null;var ss=await session();var user=ss&&ss.user;if(!user)return null;if(user.id!==window.__blAuthUserId||user.id!==localStorage.beyondProfileOwner)return null;var currentState=JSON.stringify(s());if(lastSyncedOwner===user.id&&lastSyncedState===currentState)return {ok:true,unchanged:true};if(Date.now()<syncRetryAfter)return {error:'Cloud sync temporarily unavailable. Progress remains saved on this device.'};var meta=await c.from('profiles').select('role,is_premium').eq('id',user.id).maybeSingle();if(meta.error){syncRetryAfter=Date.now()+60000;return {error:meta.error.message||String(meta.error)}}var old=meta.data;if(!window.__blAuthReady||window.__blAuthHydrating||user.id!==window.__blAuthUserId||user.id!==localStorage.beyondProfileOwner)return null;var p=JSON.parse(JSON.stringify(payload(user,old)));var r=await c.from('profiles').upsert(p,{onConflict:'id'});if(r.error){syncRetryAfter=Date.now()+60000;console.warn('Beyond progress sync failed:',r.error.message||r.error);return {error:r.error.message||String(r.error)}}lastSyncedOwner=user.id;lastSyncedState=JSON.stringify(p.profile_state);syncRetryAfter=0;return {ok:true}}catch(e){syncRetryAfter=Date.now()+60000;console.warn('Beyond progress sync failed:',e);return {error:e&&e.message?e.message:String(e)}}};
+  window.__beyondRequestProgressSync=function(){clearTimeout(syncTimer);syncTimer=setTimeout(function(){try{window.__beyondSyncProgress()}catch(e){}},1200)};
 
   window.__beyondLoadProgress=async function(){if(!window.__blAuthReady)return null;var loadRevision=window.__blLocalRevision||0;try{var ss=await session();var user=ss&&ss.user;if(!user)return null;var p=await profileFor(user);if(!p)return null;if(!window.__blAuthReady||user.id!==window.__blAuthUserId||user.id!==localStorage.beyondProfileOwner)return null;if((window.__blLocalRevision||0)!==loadRevision)return null;var st=s();if(!st)return p;var dbState=p.profile_state&&typeof p.profile_state==='object'?p.profile_state:{};Object.assign(st,dbState);st.level=Number(p.level??st.level??1);st.xp=Number(p.xp??st.xp??0);st.stats=Object.assign({AURA:0,EGO:0,STR:0,INT:0},dbState.stats||{},p.stats||{});st.checks=Object.assign({},dbState.checks??p.checks??{});if(!dbState.checks&&!p.checks)(p.completed_quests||[]).forEach(function(id){st.checks[id]=true});st.setProgress=Object.assign({},dbState.setProgress||{},p.set_progress||{});st.role=p.role||st.role||'player';st.isPremium=!!p.is_premium;if(st.isPremium){st.levelPaymentUnlocked=true;st.levelPaywallSeen=true}var nm=cleanName(p.username||p.player_name||p.display_name||p.email||(user.user_metadata&&user.user_metadata.username)||user.email);st.username=nm;st.playerName=nm;st.leaderboardName=nm;localStorage.questPlayerUsername=nm.toUpperCase();localStorage.playerName=nm;localStorage.leaderboardName=nm;try{save()}catch(e){localStorage.questAppV1=JSON.stringify(st)}try{render();applyPathMenu()}catch(e){}var entered=localStorage.questPlayerAccepted==='1'||localStorage.playerEntered==='true';if(entered)document.body.classList.add('player-entered');return p}catch(e){console.warn('Beyond progress load failed:',e);return null}};
 
