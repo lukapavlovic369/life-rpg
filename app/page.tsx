@@ -1886,16 +1886,8 @@ export default function Page() {
 
 
   useEffect(() => {
-    // Align the title row and move the rest of the screen with it.
-    const css = document.createElement("style");
-    css.id = "beyond-align-screen-headings";
-    css.textContent = `
-      html body .page .status-content[data-hamburger-aligned] {
-        translate:0 var(--heading-stack-shift,0px)!important;
-      }
-    `;
-    document.head.appendChild(css);
-    const titleSelector = ".statusHead, .freshHeading, header .title-row";
+    // Align the visible title text with the hamburger on every screen.
+    const titleSelector = ".statusHead h1, .freshHeading h1, header .title-row .title";
     const hamburger = document.querySelector(".hamburger-btn");
     let frame = 0;
     let disposed = false;
@@ -1908,15 +1900,11 @@ export default function Page() {
       const titleRect = title.getBoundingClientRect();
       const buttonRect = hamburger.getBoundingClientRect();
       if (!titleRect.height || !buttonRect.height) return;
-      if (!content.hasAttribute("data-hamburger-aligned")) {
-        content.setAttribute("data-hamburger-aligned", "");
-        alignActiveHeading();
-        return;
-      }
-      const applied = parseFloat(content.style.getPropertyValue("--heading-stack-shift")) || 0;
+      const applied = parseFloat(content.style.top) || 0;
       const delta = buttonRect.top + buttonRect.height / 2 - titleRect.top - titleRect.height / 2;
       if (Math.abs(delta) > .25) {
-        content.style.setProperty("--heading-stack-shift", (applied + delta).toFixed(2) + "px");
+        content.style.setProperty("position", "relative", "important");
+        content.style.setProperty("top", (applied + delta).toFixed(2) + "px", "important");
       }
     };
     const schedule = () => {
@@ -1925,7 +1913,12 @@ export default function Page() {
       frame = requestAnimationFrame(alignActiveHeading);
     };
     const pages = document.querySelectorAll(".page");
-    const observer = new MutationObserver(schedule);
+    let settled = 0;
+    const observer = new MutationObserver(() => {
+      schedule();
+      window.clearTimeout(settled);
+      settled = window.setTimeout(schedule, 850);
+    });
     const sizes = new ResizeObserver(schedule);
     for (const page of pages) {
       observer.observe(page, {attributes:true, attributeFilter:["class"]});
@@ -1939,6 +1932,7 @@ export default function Page() {
     document.addEventListener("scroll", schedule, true);
     document.fonts?.ready.then(schedule);
     schedule();
+    settled = window.setTimeout(schedule, 850);
     return () => {
       disposed = true;
       observer.disconnect();
@@ -1947,7 +1941,7 @@ export default function Page() {
       window.removeEventListener("resize", schedule);
       window.visualViewport?.removeEventListener("resize", schedule);
       document.removeEventListener("scroll", schedule, true);
-      css.remove();
+      window.clearTimeout(settled);
     };
   }, []);
 
