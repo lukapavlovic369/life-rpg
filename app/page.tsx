@@ -1877,6 +1877,16 @@ export default function Page() {
     css.id = "beyond-menu-single-tap";
     css.textContent = `
       html body .hamburger-btn, html body #hamburgerMenu button { touch-action:manipulation!important; }
+      html body .hamburger-panel,
+      html body:is(.page-switching,.hud-gate-opening) .hamburger-panel,
+      html body .page.active.system-enter,
+      html body:is(.page-switching,.hud-gate-opening) .page.active.system-enter,
+      html body .page.active.system-enter > :is(.screen,.status-screen,.hygiene-screen),
+      html body:is(.page-switching,.hud-gate-opening) .page.active.system-enter > :is(.screen,.status-screen,.hygiene-screen) {
+        animation:none!important;
+      }
+      html body .hamburger-btn:hover,
+      html body .hamburger-btn:active { transform:none!important; }
       @media (hover:none) {
         html body .hamburger-btn:hover, html body #hamburgerMenu button:hover { transform:none!important; }
       }
