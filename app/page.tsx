@@ -1886,58 +1886,68 @@ export default function Page() {
 
 
   useEffect(() => {
-    // Move the complete Status stack together; preserve every internal gap.
+    // Align the title row and move the rest of the screen with it.
     const css = document.createElement("style");
-    css.id = "beyond-status-align-hamburger";
+    css.id = "beyond-align-screen-headings";
     css.textContent = `
-      html body #status .status-content {
-        translate:0 var(--status-stack-shift,0px)!important;
+      html body .page .status-content[data-hamburger-aligned] {
+        translate:0 var(--heading-stack-shift,0px)!important;
       }
     `;
     document.head.appendChild(css);
+    const titleSelector = ".statusHead, .freshHeading, header .title-row";
+    const hamburger = document.querySelector(".hamburger-btn");
     let frame = 0;
-    const alignStatus = () => {
-      const page = document.getElementById("status");
-      const content = page?.querySelector(".status-content") as HTMLElement | null;
-      const heading = page?.querySelector(".statusHead");
-      const hamburger = document.querySelector(".hamburger-btn");
-      if (!page?.classList.contains("active") || !content || !heading || !hamburger) return;
-      const titleRect = heading.getBoundingClientRect();
+    let disposed = false;
+    const alignActiveHeading = () => {
+      const page = document.querySelector(".page.active");
+      const content = page?.querySelector<HTMLElement>(".status-content");
+      const title = content?.querySelector(titleSelector);
+      if (!page || !content || !title || !hamburger) return;
+      if ([page, content, content.closest("main")].some((el) => (el?.scrollTop ?? 0) > 1)) return;
+      const titleRect = title.getBoundingClientRect();
       const buttonRect = hamburger.getBoundingClientRect();
       if (!titleRect.height || !buttonRect.height) return;
-      const currentShift = parseFloat(content.style.getPropertyValue("--status-stack-shift")) || 0;
-      const baseCenter = titleRect.top + titleRect.height / 2 - currentShift;
-      const targetCenter = buttonRect.top + buttonRect.height / 2;
-      const nextShift = Math.round((targetCenter - baseCenter) * 100) / 100;
-      if (Math.abs(nextShift - currentShift) > .25) {
-        content.style.setProperty("--status-stack-shift", nextShift + "px");
+      if (!content.hasAttribute("data-hamburger-aligned")) {
+        content.setAttribute("data-hamburger-aligned", "");
+        alignActiveHeading();
+        return;
+      }
+      const applied = parseFloat(content.style.getPropertyValue("--heading-stack-shift")) || 0;
+      const delta = buttonRect.top + buttonRect.height / 2 - titleRect.top - titleRect.height / 2;
+      if (Math.abs(delta) > .25) {
+        content.style.setProperty("--heading-stack-shift", (applied + delta).toFixed(2) + "px");
       }
     };
     const schedule = () => {
+      if (disposed) return;
       cancelAnimationFrame(frame);
-      frame = requestAnimationFrame(alignStatus);
+      frame = requestAnimationFrame(alignActiveHeading);
     };
-    schedule();
-    const delays = [300,900,1800].map((delay) => window.setTimeout(schedule,delay));
-    window.addEventListener("resize", schedule);
-    document.fonts?.ready.then(schedule);
-    const page = document.getElementById("status");
-    const observer = new MutationObserver(() => {
-      schedule();
-      window.clearTimeout(returnTimer);
-      returnTimer = window.setTimeout(schedule,1800);
-    });
-    let returnTimer = 0;
-    if (page) observer.observe(page,{attributes:true,attributeFilter:["class"]});
+    const pages = document.querySelectorAll(".page");
+    const observer = new MutationObserver(schedule);
     const sizes = new ResizeObserver(schedule);
-    const heading = page?.querySelector(".statusHead");
-    const hamburger = document.querySelector(".hamburger-btn");
-    if (heading) sizes.observe(heading);
+    for (const page of pages) {
+      observer.observe(page, {attributes:true, attributeFilter:["class"]});
+      const title = page.querySelector(titleSelector);
+      if (title) sizes.observe(title);
+    }
     if (hamburger) sizes.observe(hamburger);
+    observer.observe(document.body, {attributes:true, attributeFilter:["class"]});
+    window.addEventListener("resize", schedule);
+    window.visualViewport?.addEventListener("resize", schedule);
+    document.addEventListener("scroll", schedule, true);
+    document.fonts?.ready.then(schedule);
+    schedule();
     return () => {
-      observer.disconnect(); sizes.disconnect(); cancelAnimationFrame(frame);
-      delays.forEach((id) => window.clearTimeout(id)); window.clearTimeout(returnTimer);
-      window.removeEventListener("resize",schedule); css.remove();
+      disposed = true;
+      observer.disconnect();
+      sizes.disconnect();
+      cancelAnimationFrame(frame);
+      window.removeEventListener("resize", schedule);
+      window.visualViewport?.removeEventListener("resize", schedule);
+      document.removeEventListener("scroll", schedule, true);
+      css.remove();
     };
   }, []);
 
