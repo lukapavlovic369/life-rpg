@@ -1748,15 +1748,21 @@ export default function Page() {
           html body #status .levelBox { margin:0 0 14px!important; }
           html body #status .levelBox h2 { font-size:36px!important; line-height:1.15!important; }
           html body #status .levelBox p { margin-top:6px!important; }
+          html body #status .status-content > :is(.resetPanel,.xpPercentPanel,.statsBox) {
+            width:94%!important;
+            max-width:none!important;
+            margin-inline:auto!important;
+            box-sizing:border-box!important;
+          }
           html body #status .timerBox {
-            width:94%!important; min-height:120px!important;
+            min-height:120px!important;
             padding:14px 12px!important; margin:0 auto 14px!important;
           }
           html body #status .barBox {
             min-height:48px!important; margin:0 0 12px!important;
           }
           html body #status .statsBox {
-            width:100%!important; min-height:0!important;
+            min-height:0!important;
             padding:12px 14px!important; margin:12px auto 0!important;
           }
           html body #status .statsBox .stat-line { min-height:44px!important; }
